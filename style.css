@@ -1,1 +1,38 @@
 *{box-sizing:border-box}:root{--ink:#332d35;--muted:#756d76;--pink:#ff7d9b;--cream:#fffaf5}html{scroll-behavior:smooth}body{margin:0;background:var(--cream);color:var(--ink);font-family:"DM Sans",sans-serif;line-height:1.7}body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.3;background-image:radial-gradient(#ffb5c4 1px,transparent 1px);background-size:22px 22px}.hero{min-height:100vh;display:grid;place-items:center;text-align:center;padding:40px 20px;background:linear-gradient(145deg,#fffaf5,#fff0f3 55%,#fff7df)}h1,h2{line-height:1.12}h1{font-size:clamp(3.3rem,9vw,7rem);letter-spacing:-.05em}h1 span,h2 span{color:var(--pink)}.hero p{font-size:1.2rem;color:var(--muted)}.tiny,.eyebrow{font-size:.78rem;letter-spacing:.13em;text-transform:uppercase;font-weight:700;color:#a66d7c}.primary,.secondary{border:0;border-radius:999px;padding:14px 23px;background:var(--ink);color:#fff;font:inherit;font-weight:700;cursor:pointer}.secondary{background:#f1e4e7;color:var(--ink)}.scroll{margin-top:25px;color:#8c828a;font-size:.8rem}.hidden{display:none!important}main{max-width:980px;margin:auto;padding:70px 20px}section{margin-bottom:105px}.card{background:#fffdfb;border:1px solid #f0dfe2;border-radius:30px;box-shadow:0 20px 60px #5c3a4610}.intro{text-align:center;padding:60px 25px}.sticker{font-size:3rem}.intro h2{font-size:clamp(2.2rem,6vw,4rem)}.letter-wrap{text-align:center}.letter{max-width:760px;margin:25px auto 0;text-align:left;padding:55px clamp(24px,7vw,70px);position:relative;transform:rotate(-.3deg);background:#fffdf9}.letter:before{content:"";position:absolute;inset:10px;border:1px dashed #ead9dc;border-radius:22px}.letter h2{font-family:Pacifico,cursive;color:#e96d8a;font-weight:400}.letter p{position:relative}.tape{position:absolute;width:105px;height:28px;background:#ffe2a8;top:-13px;left:50%;transform:translateX(-50%) rotate(2deg)}.muted{color:var(--muted)}.gallery{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:210px;gap:15px;margin-top:25px}.photo{border-radius:22px;overflow:hidden;background:#fff7f7;border:1px dashed #e6b9c3}.photo img{width:100%;height:100%;object-fit:cover}.tall{grid-row:span 2}.wide{grid-column:span 2}.empty{grid-column:1/-1;min-height:210px;border-radius:22px;border:2px dashed #e6c7cd;background:#fff7f7;display:grid;place-items:center;text-align:center;color:#9d7480}.collage,.music{padding:45px;text-align:center}.collagebox{min-height:360px;border:2px dashed #e6c7cd;border-radius:22px;background:#fff7f7;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:#9d7480;font-size:3rem;overflow:hidden}.collagebox img{width:100%;min-height:360px;object-fit:contain}.collagebox b{font-size:1rem}.music{background:#fff4d9}.music-icon{font-size:3rem}audio{width:min(600px,100%);margin-top:15px}.final{text-align:center}.note{display:inline-block;background:#fff1a9;padding:55px 40px 40px;max-width:700px;transform:rotate(1deg);box-shadow:0 20px 45px #80650f1c}.note h2{font-size:clamp(2rem,5vw,3.5rem)}.note small{font-family:Pacifico,cursive;color:#8b7161}footer{text-align:center;padding:35px;color:#8d8188;font-size:.85rem}.confetti-piece{position:fixed;top:-20px;width:9px;height:15px;z-index:50;animation:fall linear forwards}@keyframes fall{to{transform:translate3d(var(--x),110vh,0) rotate(720deg);opacity:0}}@media(max-width:700px){main{padding-top:45px}.gallery{grid-template-columns:1fr 1fr;grid-auto-rows:190px}.tall{grid-row:span 1}.wide{grid-column:span 2}.collage,.music{padding:25px}.collagebox,.collagebox img{min-height:280px}.letter{padding:45px 23px}}
+/* V4 landing-button safety fix */
+.hero-inner { position: relative; z-index: 10; }
+.hero-button {
+  display: inline-block;
+  position: relative;
+  z-index: 20;
+  pointer-events: auto !important;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* V5 teddy landing */
+.teddy-link{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;text-decoration:none;color:inherit;position:relative;z-index:30;cursor:pointer;min-width:210px}
+.teddy{position:relative;width:190px;height:225px;animation:teddyFloat 2.8s ease-in-out infinite;filter:drop-shadow(0 16px 16px rgba(85,55,45,.13))}
+.teddy .head{position:absolute;left:45px;top:35px;width:100px;height:92px;border-radius:50% 50% 46% 46%;background:#b97855;border:4px solid #8d5b43}
+.teddy .ear{position:absolute;top:20px;width:48px;height:48px;border-radius:50%;background:#b97855;border:4px solid #8d5b43;z-index:0}
+.teddy .ear:after{content:"";position:absolute;inset:10px;border-radius:50%;background:#e7a07f}
+.teddy .ear.left{left:31px}.teddy .ear.right{right:31px}
+.teddy .eye{position:absolute;top:34px;width:9px;height:11px;border-radius:50%;background:#332d35}
+.teddy .eye-left{left:29px}.teddy .eye-right{right:29px}
+.teddy .muzzle{position:absolute;left:31px;top:52px;width:39px;height:29px;border-radius:50%;background:#e7b08d}
+.teddy .nose{position:absolute;left:15px;top:7px;width:10px;height:8px;border-radius:50%;background:#332d35}
+.teddy .mouth{position:absolute;left:19px;top:14px;width:2px;height:8px;background:#7a493a}
+.teddy .mouth:after{content:"";position:absolute;left:-5px;top:7px;width:10px;height:6px;border-bottom:2px solid #7a493a;border-radius:50%}
+.teddy .body{position:absolute;left:39px;top:115px;width:112px;height:92px;border-radius:48% 48% 38% 38%;background:#b97855;border:4px solid #8d5b43}
+.teddy .body:after{content:"";position:absolute;left:30px;top:23px;width:48px;height:42px;border-radius:50%;background:#e7b08d}
+.teddy .arm{position:absolute;top:128px;width:35px;height:76px;border-radius:50%;background:#b97855;border:4px solid #8d5b43;z-index:2}
+.teddy .arm-left{left:23px;transform:rotate(25deg)}.teddy .arm-right{right:23px;transform:rotate(-25deg)}
+.flower-bunch{position:absolute;z-index:4;left:65px;top:117px;font-size:31px;display:flex;gap:-3px;transform:rotate(-8deg)}
+.flower-bunch span{display:inline-block;margin-left:-8px;filter:drop-shadow(0 2px 1px rgba(0,0,0,.12))}
+.teddy-hint{margin-top:4px;font-size:.9rem;font-weight:700;color:#8d6b72;letter-spacing:.03em}
+.teddy-link:hover .teddy{animation:teddyBounce .65s ease-in-out infinite}
+.teddy-link:focus-visible{outline:3px solid #ff9bb0;outline-offset:8px;border-radius:25px}
+@keyframes teddyFloat{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-8px) rotate(1deg)}}
+@keyframes teddyBounce{0%,100%{transform:translateY(0) rotate(-2deg) scale(1)}50%{transform:translateY(-12px) rotate(2deg) scale(1.04)}}
+.teddy-hug{animation:teddyBounce .65s ease-in-out 2!important}
+@media(max-width:500px){.teddy{transform:scale(.9);transform-origin:center}.teddy-link{min-width:180px}}

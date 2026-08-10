@@ -17,7 +17,19 @@
     <div class="tiny">A little something for you</div>
     <h1>Happy Birthday,<br><span>Yashi ❤️</span></h1>
     <p>For my favourite human.</p>
-    <button id="openBtn" class="primary" type="button">Open your surprise ✨</button>
+    <a id="openBtn" class="teddy-link" href="#content" aria-label="Open your birthday surprise">
+  <div class="teddy" aria-hidden="true">
+    <div class="ear left"></div><div class="ear right"></div>
+    <div class="head">
+      <div class="eye eye-left"></div><div class="eye eye-right"></div>
+      <div class="muzzle"><div class="nose"></div><div class="mouth"></div></div>
+    </div>
+    <div class="body"></div>
+    <div class="arm arm-left"></div><div class="arm arm-right"></div>
+    <div class="flower-bunch"><span>🌷</span><span>🌼</span><span>🌷</span><span>🌸</span></div>
+  </div>
+  <div class="teddy-hint">tap the teddy 🧸💐</div>
+</a>
     <div class="scroll">↓ keep scrolling</div>
   </div>
 </header>
@@ -86,6 +98,6 @@
 <footer>Made for Yashi • 11 August ❤️</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="app.js"></script>
+<script src="app.js" defer></script>
 </body>
 </html>
