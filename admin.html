@@ -1,22 +1,315 @@
+<!doctype html>
+<html lang="en">
 
-<section class="admin-card editor-card">
-  <p class="eyebrow">✍️ Editable text</p>
-  <h2>Birthday Letter</h2>
-  <p class="admin-help">Write the letter exactly how you want it to appear. Separate paragraphs with a blank line.</p>
-  <textarea id="letterEditor" rows="18" placeholder="Write Yashi's letter here..."></textarea>
-  <h2>Final Note</h2>
-  <input id="finalTitleEditor" type="text" placeholder="Hope this little website makes you smile. ❤️">
-  <input id="finalCaptionEditor" type="text" placeholder="made with way too much love & a little bit of chaos :)">
-  <button id="saveTextBtn" class="primary" type="button">Save Letter & Note 💾</button>
-  <span id="textSaveStatus" class="save-status"></span>
-</section>
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Yashi Birthday — Admin</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="admin.css"></head><body>
-<div class="admin-wrap"><div class="admin-card" id="loginCard"><p class="eyebrow">Private editor</p><h1>Yashi's birthday 🎂</h1><p class="muted">Sign in to manage the live website.</p>
-<form id="loginForm"><input id="email" type="email" placeholder="Your email" required><input id="password" type="password" placeholder="Password" required><button class="primary">Sign in</button></form><p id="loginMsg"></p></div>
-<div class="admin-card hidden" id="panel"><div class="topbar"><div><p class="eyebrow">Admin panel</p><h1>Make it yours ❤️</h1></div><button id="logout" class="secondary">Log out</button></div>
-<div class="admin-grid"><section class="admin-section"><h2>📸 Photos</h2><p class="muted">Select multiple photos.</p><input id="photoInput" type="file" accept="image/*" multiple><button id="uploadPhotos" class="primary">Upload photos</button><div id="photoList" class="media-list"></div></section>
-<section class="admin-section"><h2>🖼️ Collage</h2><input id="collageInput" type="file" accept="image/*"><button id="uploadCollage" class="primary">Upload collage</button><div id="collagePreview" class="preview"></div></section>
-<section class="admin-section"><h2>🎵 Music</h2><p class="muted">Upload audio you have permission to host.</p><input id="musicInput" type="file" accept="audio/*"><button id="uploadMusic" class="primary">Upload music</button><div id="musicPreview"></div></section></div>
-<div class="actions"><a class="secondary link" href="./index.html" target="_blank">Open birthday page ↗</a><p id="status"></p></div></div></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="admin.js"></script></body></html>
+<head>
+
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  >
+
+  <title>Yashi Birthday — Admin</title>
+
+  <link
+    rel="stylesheet"
+    href="style.css"
+  >
+
+  <link
+    rel="stylesheet"
+    href="admin.css"
+  >
+
+</head>
+
+
+<body>
+
+  <div class="admin-wrap">
+
+
+    <!-- =====================================================
+         LOGIN
+         ===================================================== -->
+
+    <div
+      class="admin-card"
+      id="loginCard"
+    >
+
+      <p class="eyebrow">
+        Private editor
+      </p>
+
+      <h1>
+        Yashi's birthday 🎂
+      </h1>
+
+      <p class="muted">
+        Sign in to manage the live website.
+      </p>
+
+
+      <form id="loginForm">
+
+        <input
+          id="email"
+          type="email"
+          placeholder="Your email"
+          required
+        >
+
+        <input
+          id="password"
+          type="password"
+          placeholder="Password"
+          required
+        >
+
+        <button
+          class="primary"
+          type="submit"
+        >
+          Sign in
+        </button>
+
+      </form>
+
+
+      <p id="loginMsg"></p>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         ADMIN PANEL
+         ===================================================== -->
+
+    <div
+      class="admin-card hidden"
+      id="panel"
+    >
+
+      <div class="topbar">
+
+        <div>
+
+          <p class="eyebrow">
+            Admin panel
+          </p>
+
+          <h1>
+            Make it yours ❤️
+          </h1>
+
+        </div>
+
+
+        <button
+          id="logout"
+          class="secondary"
+          type="button"
+        >
+          Log out
+        </button>
+
+      </div>
+
+
+
+      <!-- ===================================================
+           EDITABLE TEXT
+           =================================================== -->
+
+      <section class="admin-card editor-card">
+
+        <p class="eyebrow">
+          ✍️ Editable text
+        </p>
+
+        <h2>
+          Birthday Letter
+        </h2>
+
+        <p class="admin-help">
+          Write the letter exactly how you want it to appear.
+          Separate paragraphs with a blank line.
+        </p>
+
+        <textarea
+          id="letterEditor"
+          rows="18"
+          placeholder="Write Yashi's letter here..."
+        ></textarea>
+
+
+        <h2>
+          Final Note
+        </h2>
+
+        <p class="admin-help">
+          This appears at the very end of the birthday website.
+        </p>
+
+        <label for="finalTitleEditor">
+          Main message
+        </label>
+
+        <input
+          id="finalTitleEditor"
+          type="text"
+          placeholder="Hope this little website makes you smile. ❤️"
+        >
+
+
+        <label for="finalCaptionEditor">
+          Small caption
+        </label>
+
+        <input
+          id="finalCaptionEditor"
+          type="text"
+          placeholder="made with way too much love & a little bit of chaos :)"
+        >
+
+
+        <button
+          id="saveTextBtn"
+          class="primary"
+          type="button"
+        >
+          Save Letter & Note 💾
+        </button>
+
+
+        <span
+          id="textSaveStatus"
+          class="save-status"
+        ></span>
+
+      </section>
+
+
+
+      <!-- ===================================================
+           MEDIA
+           =================================================== -->
+
+      <div class="admin-grid">
+
+
+        <!-- PHOTOS -->
+
+        <section class="admin-section">
+
+          <h2>
+            📸 Photos
+          </h2>
+
+          <p class="muted">
+            Select multiple photos.
+          </p>
+
+          <input
+            id="photoInput"
+            type="file"
+            accept="image/*"
+            multiple
+          >
+
+          <button
+            id="uploadPhotos"
+            class="primary"
+            type="button"
+          >
+            Upload photos
+          </button>
+
+          <div
+            id="photoList"
+            class="media-list"
+          ></div>
+
+        </section>
+
+
+
+        <!-- MUSIC -->
+
+        <section class="admin-section">
+
+          <h2>
+            🎵 Music
+          </h2>
+
+          <p class="muted">
+            Upload the birthday song you want to play
+            in the background.
+          </p>
+
+          <input
+            id="musicInput"
+            type="file"
+            accept="audio/*"
+          >
+
+          <button
+            id="uploadMusic"
+            class="primary"
+            type="button"
+          >
+            Upload music
+          </button>
+
+          <div
+            id="musicPreview"
+          ></div>
+
+        </section>
+
+      </div>
+
+
+
+      <!-- ===================================================
+           ACTIONS
+           =================================================== -->
+
+      <div class="actions">
+
+        <a
+          class="secondary link"
+          href="./index.html"
+          target="_blank"
+        >
+          Open birthday page ↗
+        </a>
+
+        <p id="status"></p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+
+  <!-- =====================================================
+       SUPABASE
+       ===================================================== -->
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+  ></script>
+
+  <script
+    src="admin.js"
+  ></script>
+
+</body>
+
+</html>
