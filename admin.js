@@ -116,7 +116,7 @@
         type: type,
         file_path: path,
         file_name: file.name,
-        display_order: Date.now()
+        display_order: Math.floor(Date.now()/100000)
       });
 
     if (result.error) {
