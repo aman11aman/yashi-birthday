@@ -928,3 +928,166 @@ body.photo-viewer-open {
     transform: none;
   }
 }
+/* =========================================================
+   PHOTO SLIDE TRANSITIONS
+   ========================================================= */
+
+.photo-viewer-image {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+
+/* Moving to the next photo */
+
+.photo-viewer-image.slide-out-left {
+  animation: photoOutLeft 0.3s ease forwards;
+}
+
+
+/* Moving to the previous photo */
+
+.photo-viewer-image.slide-out-right {
+  animation: photoOutRight 0.3s ease forwards;
+}
+
+
+/* New photo enters from the right */
+
+.photo-viewer-image.slide-in-right {
+  animation: photoInRight 0.4s cubic-bezier(.2,.8,.2,1);
+}
+
+
+/* New photo enters from the left */
+
+.photo-viewer-image.slide-in-left {
+  animation: photoInLeft 0.4s cubic-bezier(.2,.8,.2,1);
+}
+
+
+@keyframes photoOutLeft {
+
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateX(-45px) scale(.96);
+  }
+}
+
+
+@keyframes photoOutRight {
+
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateX(45px) scale(.96);
+  }
+}
+
+
+@keyframes photoInRight {
+
+  from {
+    opacity: 0;
+    transform: translateX(45px) scale(.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+
+@keyframes photoInLeft {
+
+  from {
+    opacity: 0;
+    transform: translateX(-45px) scale(.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+
+/* Keep the animation comfortable on phones */
+
+@media (max-width: 700px) {
+
+  @keyframes photoOutLeft {
+
+    from {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+    }
+
+    to {
+      opacity: 0;
+      transform: translateX(-30px) scale(.97);
+    }
+  }
+
+  @keyframes photoOutRight {
+
+    from {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+    }
+
+    to {
+      opacity: 0;
+      transform: translateX(30px) scale(.97);
+    }
+  }
+
+  @keyframes photoInRight {
+
+    from {
+      opacity: 0;
+      transform: translateX(30px) scale(.97);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+    }
+  }
+
+  @keyframes photoInLeft {
+
+    from {
+      opacity: 0;
+      transform: translateX(-30px) scale(.97);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+    }
+  }
+}
+
+
+/* Respect reduced-motion settings */
+
+@media (prefers-reduced-motion: reduce) {
+
+  .photo-viewer-image.slide-out-left,
+  .photo-viewer-image.slide-out-right,
+  .photo-viewer-image.slide-in-right,
+  .photo-viewer-image.slide-in-left {
+    animation: none;
+  }
+}
