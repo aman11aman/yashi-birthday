@@ -107,3 +107,28 @@ document.addEventListener("DOMContentLoaded", () => {
   // Never let media errors affect the landing page.
   loadMedia();
 });
+
+async function loadSiteContent() {
+  try {
+    if (!window.supabase) return;
+    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const { data, error } = await client.from("site_content").select("key,value");
+    if (error) throw error;
+    const map = Object.fromEntries((data || []).map(row => [row.key, row.value]));
+    if (map.letter_html) {
+      const el = document.getElementById("letterContent");
+      if (el) el.innerHTML = map.letter_html;
+    }
+    if (map.final_note_title) {
+      const el = document.getElementById("finalNoteTitle");
+      if (el) el.innerHTML = map.final_note_title;
+    }
+    if (map.final_note_caption) {
+      const el = document.getElementById("finalNoteCaption");
+      if (el) el.textContent = map.final_note_caption;
+    }
+  } catch (e) {
+    console.warn("Editable text is unavailable; using built-in text.", e);
+  }
+}
+document.addEventListener("DOMContentLoaded", loadSiteContent);
