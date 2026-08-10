@@ -3,17 +3,11 @@ const SUPABASE_KEY = "sb_publishable_o8YYHkc9w4NzqBvJv8FjkQ_8FXaKGfm";
 const BUCKET = "birthday-media";
 
 function getClient() {
-  return window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
+  return window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 }
 
 function publicUrl(client, path) {
-  return client.storage
-    .from(BUCKET)
-    .getPublicUrl(path)
-    .data.publicUrl;
+  return client.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
 }
 
 let birthdayPhotos = [];
@@ -22,7 +16,53 @@ let photoTransitioning = false;
 
 
 /* =========================================================
-   LOAD PHOTOS + MUSIC
+   FLOATING BIRTHDAY DECORATIONS
+   ========================================================= */
+
+function createBirthdayDecorations() {
+  if (document.querySelector(".birthday-floaters")) return;
+
+  const container = document.createElement("div");
+  container.className = "birthday-floaters";
+  container.setAttribute("aria-hidden", "true");
+
+  const decorations = [
+    "🎈", "✨", "🎈", "🌸", "✨",
+    "🎈", "⭐", "🌼", "✨", "🎈",
+    "🎉", "🌸"
+  ];
+
+  decorations.forEach((emoji, index) => {
+    const item = document.createElement("span");
+
+    item.className = "birthday-floater";
+    item.textContent = emoji;
+
+    item.style.setProperty(
+      "--float-delay",
+      `${index * 0.7}s`
+    );
+
+    item.style.setProperty(
+      "--float-duration",
+      `${5 + (index % 4)}s`
+    );
+
+    item.style.left =
+      `${5 + Math.random() * 90}%`;
+
+    item.style.top =
+      `${8 + Math.random() * 82}%`;
+
+    container.appendChild(item);
+  });
+
+  document.body.appendChild(container);
+}
+
+
+/* =========================================================
+   PHOTO GALLERY
    ========================================================= */
 
 async function loadMedia() {
@@ -62,7 +102,7 @@ async function loadMedia() {
 
 
     /* =====================================================
-       PHOTO GALLERY
+       PHOTOS
        ===================================================== */
 
     const gallery =
@@ -79,101 +119,74 @@ async function loadMedia() {
 
       } else {
 
-        birthdayPhotos.forEach(
-          (photo, index) => {
+        birthdayPhotos.forEach((photo, index) => {
 
-            const box =
-              document.createElement("div");
+          const box =
+            document.createElement("div");
 
-            box.className = "photo";
+          box.className = "photo";
 
-            if (index === 1) {
-              box.classList.add("tall");
-            }
+          if (index === 1) {
+            box.classList.add("tall");
+          }
 
-            if (index === 3) {
-              box.classList.add("wide");
-            }
+          if (index === 3) {
+            box.classList.add("wide");
+          }
 
-            box.setAttribute(
-              "role",
-              "button"
+          box.setAttribute("role", "button");
+          box.setAttribute("tabindex", "0");
+
+          box.setAttribute(
+            "aria-label",
+            `Open photo ${index + 1}`
+          );
+
+          const img =
+            document.createElement("img");
+
+          img.src =
+            publicUrl(
+              client,
+              photo.file_path
             );
 
-            box.setAttribute(
-              "tabindex",
-              "0"
-            );
+          img.alt = "Birthday memory";
+          img.loading = "lazy";
 
-            box.setAttribute(
-              "aria-label",
-              `Open photo ${index + 1}`
-            );
-
-            const img =
-              document.createElement("img");
-
-            img.src =
-              publicUrl(
-                client,
-                photo.file_path
-              );
-
-            img.alt =
-              "Birthday memory";
-
-            img.loading =
-              "lazy";
-
-            box.appendChild(img);
-
-            gallery.appendChild(box);
+          box.appendChild(img);
+          gallery.appendChild(box);
 
 
-            /* Photo entrance animation */
+          /* Staggered gallery entrance */
 
-            setTimeout(
-              () => {
-                box.classList.add(
-                  "visible"
-                );
-              },
-              Math.min(
-                index * 120,
-                700
-              )
-            );
+          setTimeout(() => {
+            box.classList.add("visible");
+          }, Math.min(index * 130, 900));
 
 
-            /* Open viewer */
+          box.addEventListener(
+            "click",
+            () => openPhotoViewer(index)
+          );
 
-            box.addEventListener(
-              "click",
-              () => {
+
+          box.addEventListener(
+            "keydown",
+            event => {
+
+              if (
+                event.key === "Enter" ||
+                event.key === " "
+              ) {
+                event.preventDefault();
                 openPhotoViewer(index);
               }
-            );
 
+            }
+          );
 
-            /* Keyboard */
-
-            box.addEventListener(
-              "keydown",
-              (event) => {
-
-                if (
-                  event.key === "Enter" ||
-                  event.key === " "
-                ) {
-
-                  event.preventDefault();
-
-                  openPhotoViewer(index);
-                }
-              }
-            );
-          }
-        );
+        });
       }
     }
 
@@ -182,8 +195,7 @@ async function loadMedia() {
 
       galleryStatus.textContent =
         birthdayPhotos.length
-          ? birthdayPhotos.length +
-            " little memories"
+          ? `${birthdayPhotos.length} little memories`
           : "A few memories are waiting to be added.";
     }
 
@@ -195,9 +207,7 @@ async function loadMedia() {
     if (music) {
 
       const player =
-        document.getElementById(
-          "player"
-        );
+        document.getElementById("player");
 
       if (player) {
 
@@ -207,26 +217,20 @@ async function loadMedia() {
             music.file_path
           );
 
-        player.loop =
-          true;
-
-        player.volume =
-          0.55;
-
-        player.preload =
-          "auto";
+        player.loop = true;
+        player.volume = 0.55;
+        player.preload = "auto";
       }
     }
 
   } catch (error) {
 
     console.warn(
-      "Media is unavailable right now:",
+      "Media unavailable:",
       error
     );
 
     if (galleryStatus) {
-
       galleryStatus.textContent =
         "Your memories will appear here soon. ❤️";
     }
@@ -239,20 +243,18 @@ async function loadMedia() {
    ========================================================= */
 
 function getPhotoViewer() {
-  return document.getElementById(
-    "photoViewer"
-  );
+  return document.getElementById("photoViewer");
 }
 
 
-function updatePhotoViewer(
-  direction = "next"
-) {
+function updatePhotoViewer() {
 
   const viewer =
     getPhotoViewer();
 
-  if (!viewer) return;
+  if (!viewer || !birthdayPhotos.length) {
+    return;
+  }
 
   const image =
     viewer.querySelector(
@@ -264,63 +266,24 @@ function updatePhotoViewer(
       ".photo-viewer-counter"
     );
 
-  if (!birthdayPhotos.length) {
-    return;
-  }
+  const client = getClient();
 
   const photo =
-    birthdayPhotos[
-      currentPhotoIndex
-    ];
+    birthdayPhotos[currentPhotoIndex];
 
-  const client =
-    getClient();
-
-
-  /*
-   * Prepare the new image.
-   */
-
-  const newSrc =
+  image.src =
     publicUrl(
       client,
       photo.file_path
     );
 
-
-  /*
-   * Add direction information.
-   */
-
-  viewer.setAttribute(
-    "data-direction",
-    direction
-  );
-
-
-  /*
-   * Change the image source.
-   */
-
-  image.src =
-    newSrc;
-
   image.alt =
-    `Birthday memory ${
-      currentPhotoIndex + 1
-    }`;
-
-
-  /*
-   * Update counter.
-   */
+    `Birthday memory ${currentPhotoIndex + 1}`;
 
   if (counter) {
 
     counter.textContent =
-      `${currentPhotoIndex + 1} / ${
-        birthdayPhotos.length
-      }`;
+      `${currentPhotoIndex + 1} / ${birthdayPhotos.length}`;
   }
 }
 
@@ -352,12 +315,13 @@ function openPhotoViewer(index) {
     "none"
   );
 
-  updatePhotoViewer(
-    "none"
-  );
+  updatePhotoViewer();
 
-  viewer.classList.add(
-    "open"
+  viewer.classList.add("open");
+
+  viewer.setAttribute(
+    "aria-hidden",
+    "false"
   );
 
   document.body.classList.add(
@@ -375,8 +339,11 @@ function closePhotoViewer() {
     return;
   }
 
-  viewer.classList.remove(
-    "open"
+  viewer.classList.remove("open");
+
+  viewer.setAttribute(
+    "aria-hidden",
+    "true"
   );
 
   document.body.classList.remove(
@@ -386,12 +353,10 @@ function closePhotoViewer() {
 
 
 /* =========================================================
-   ANIMATED PHOTO CHANGE
+   ANIMATED PHOTO SLIDER
    ========================================================= */
 
-function changePhoto(
-  direction
-) {
+function changePhoto(direction) {
 
   if (
     !birthdayPhotos.length ||
@@ -403,139 +368,79 @@ function changePhoto(
   const viewer =
     getPhotoViewer();
 
-  if (!viewer) {
-    return;
-  }
-
   const image =
-    viewer.querySelector(
+    viewer?.querySelector(
       ".photo-viewer-image"
     );
 
-  if (!image) {
+  if (!viewer || !image) {
     return;
   }
 
   photoTransitioning = true;
 
-
-  /*
-   * Direction:
-   *
-   * next = photo moves left
-   * previous = photo moves right
-   */
-
-  const animationClass =
+  const outClass =
     direction === "next"
       ? "slide-out-left"
       : "slide-out-right";
 
-  image.classList.add(
-    animationClass
-  );
+  const inClass =
+    direction === "next"
+      ? "slide-in-right"
+      : "slide-in-left";
 
 
-  /*
-   * Wait for the old image
-   * to slide away.
-   */
-
-  setTimeout(
-    () => {
-
-      if (
-        direction === "next"
-      ) {
-
-        currentPhotoIndex =
-          (
-            currentPhotoIndex +
-            1
-          ) %
-          birthdayPhotos.length;
-
-      } else {
-
-        currentPhotoIndex =
-          (
-            currentPhotoIndex -
-            1 +
-            birthdayPhotos.length
-          ) %
-          birthdayPhotos.length;
-      }
+  image.classList.add(outClass);
 
 
-      /*
-       * Remove old animation.
-       */
+  setTimeout(() => {
 
-      image.classList.remove(
-        "slide-out-left",
-        "slide-out-right"
-      );
+    if (direction === "next") {
 
+      currentPhotoIndex =
+        (
+          currentPhotoIndex + 1
+        ) %
+        birthdayPhotos.length;
 
-      /*
-       * Update the photo.
-       */
+    } else {
 
-      updatePhotoViewer(
-        direction
-      );
-
-
-      /*
-       * Start new photo
-       * from opposite side.
-       */
-
-      const slideInClass =
-        direction === "next"
-          ? "slide-in-right"
-          : "slide-in-left";
-
-      image.classList.add(
-        slideInClass
-      );
+      currentPhotoIndex =
+        (
+          currentPhotoIndex -
+          1 +
+          birthdayPhotos.length
+        ) %
+        birthdayPhotos.length;
+    }
 
 
-      /*
-       * Force browser to recognize
-       * the starting position.
-       */
+    image.classList.remove(outClass);
 
-      void image.offsetWidth;
+    updatePhotoViewer();
 
+    image.classList.add(inClass);
 
-      /*
-       * Animate into center.
-       */
+    requestAnimationFrame(() => {
 
-      requestAnimationFrame(
-        () => {
+      requestAnimationFrame(() => {
 
-          image.classList.remove(
-            slideInClass
-          );
-        }
-      );
+        image.classList.remove(
+          inClass
+        );
+
+      });
+
+    });
 
 
-      setTimeout(
-        () => {
+    setTimeout(() => {
 
-          photoTransitioning =
-            false;
+      photoTransitioning = false;
 
-        },
-        430
-      );
+    }, 450);
 
-    },
-    300
-  );
+  }, 280);
 }
 
 
@@ -553,18 +458,16 @@ function showNextPhoto() {
    CONFETTI
    ========================================================= */
 
-function confetti() {
+function confetti(amount = 90) {
 
   const container =
-    document.getElementById(
-      "confetti"
-    );
+    document.getElementById("confetti");
 
   if (!container) {
     return;
   }
 
-  for (let i = 0; i < 90; i++) {
+  for (let i = 0; i < amount; i++) {
 
     const piece =
       document.createElement("i");
@@ -573,32 +476,18 @@ function confetti() {
       "confetti-piece";
 
     piece.style.left =
-      Math.random() *
-        100 +
-      "vw";
+      `${Math.random() * 100}vw`;
 
     piece.style.setProperty(
       "--x",
-      (
-        Math.random() *
-          260 -
-        130
-      ) +
-        "px"
+      `${Math.random() * 260 - 130}px`
     );
 
     piece.style.animationDuration =
-      (
-        2.8 +
-        Math.random() *
-          2.8
-      ) +
-      "s";
+      `${2.8 + Math.random() * 2.8}s`;
 
     piece.style.animationDelay =
-      Math.random() *
-        0.35 +
-      "s";
+      `${Math.random() * 0.35}s`;
 
     piece.style.background =
       [
@@ -609,18 +498,14 @@ function confetti() {
         "#c8a1ff"
       ][
         Math.floor(
-          Math.random() *
-            5
+          Math.random() * 5
         )
       ];
 
-    container.appendChild(
-      piece
-    );
+    container.appendChild(piece);
 
     setTimeout(
-      () =>
-        piece.remove(),
+      () => piece.remove(),
       6500
     );
   }
@@ -628,12 +513,385 @@ function confetti() {
 
 
 /* =========================================================
-   BIRTHDAY EXPERIENCE
+   LITTLE SPARKLE BURST
+   ========================================================= */
+
+function sparkleBurst(element) {
+
+  if (!element) return;
+
+  const rect =
+    element.getBoundingClientRect();
+
+  for (let i = 0; i < 14; i++) {
+
+    const sparkle =
+      document.createElement("span");
+
+    sparkle.className =
+      "sparkle-burst";
+
+    sparkle.textContent =
+      i % 2 === 0
+        ? "✨"
+        : "⭐";
+
+    sparkle.style.left =
+      `${rect.left + rect.width / 2}px`;
+
+    sparkle.style.top =
+      `${rect.top + rect.height / 2}px`;
+
+    sparkle.style.setProperty(
+      "--sx",
+      `${Math.cos(i * Math.PI / 7) * 100}px`
+    );
+
+    sparkle.style.setProperty(
+      "--sy",
+      `${Math.sin(i * Math.PI / 7) * 100}px`
+    );
+
+    document.body.appendChild(
+      sparkle
+    );
+
+    setTimeout(
+      () => sparkle.remove(),
+      1000
+    );
+  }
+}
+
+
+/* =========================================================
+   BIRTHDAY SURPRISE
+   ========================================================= */
+
+function createBirthdaySurprise() {
+
+  if (
+    document.getElementById(
+      "birthdaySurprise"
+    )
+  ) {
+    return;
+  }
+
+  const section =
+    document.createElement("section");
+
+  section.id =
+    "birthdaySurprise";
+
+  section.className =
+    "birthday-surprise";
+
+  section.innerHTML = `
+    <div class="surprise-card">
+
+      <div class="surprise-eyebrow">
+        A tiny birthday surprise 🎁
+      </div>
+
+      <button
+        id="giftButton"
+        class="gift-button"
+        type="button"
+        aria-label="Open birthday gift"
+      >
+        🎁
+      </button>
+
+      <p class="surprise-hint">
+        one last little surprise...
+      </p>
+
+      <div
+        id="giftMessage"
+        class="gift-message"
+      >
+        <h2>
+          You deserve the happiest year yet! 🎂✨
+        </h2>
+
+        <p>
+          Keep smiling, keep dreaming,
+          keep being wonderfully you.
+        </p>
+      </div>
+
+    </div>
+  `;
+
+  const final =
+    document.querySelector(
+      ".final"
+    );
+
+  if (final) {
+    final.before(section);
+  } else {
+    document
+      .getElementById("content")
+      ?.appendChild(section);
+  }
+
+
+  const giftButton =
+    document.getElementById(
+      "giftButton"
+    );
+
+  const giftMessage =
+    document.getElementById(
+      "giftMessage"
+    );
+
+  giftButton?.addEventListener(
+    "click",
+    () => {
+
+      giftButton.classList.add(
+        "gift-open"
+      );
+
+      giftMessage.classList.add(
+        "show"
+      );
+
+      sparkleBurst(
+        giftButton
+      );
+
+      confetti(55);
+    }
+  );
+}
+
+
+/* =========================================================
+   LETTER + FINAL NOTE REVEAL
+   ========================================================= */
+
+function setupScrollAnimations() {
+
+  const elements =
+    document.querySelectorAll(
+      ".letter-wrap, .final, .birthday-surprise"
+    );
+
+  if (
+    !("IntersectionObserver" in window)
+  ) {
+
+    elements.forEach(
+      element =>
+        element.classList.add(
+          "scroll-visible"
+        )
+    );
+
+    return;
+  }
+
+
+  const observer =
+    new IntersectionObserver(
+      entries => {
+
+        entries.forEach(
+          entry => {
+
+            if (
+              entry.isIntersecting
+            ) {
+
+              entry.target.classList.add(
+                "scroll-visible"
+              );
+
+              observer.unobserve(
+                entry.target
+              );
+            }
+
+          }
+        );
+
+      },
+      {
+        threshold: 0.12
+      }
+    );
+
+
+  elements.forEach(
+    element =>
+      observer.observe(element)
+  );
+}
+
+
+/* =========================================================
+   MUSIC VISUALIZER
+   ========================================================= */
+
+function setupMusic(player, musicToggle) {
+
+  if (!player || !musicToggle) {
+    return;
+  }
+
+  musicToggle.addEventListener(
+    "click",
+    async () => {
+
+      if (player.paused) {
+
+        try {
+
+          await player.play();
+
+        } catch (error) {
+
+          console.warn(
+            "Music could not start:",
+            error
+          );
+        }
+
+      } else {
+
+        player.pause();
+      }
+    }
+  );
+
+
+  player.addEventListener(
+    "play",
+    () => {
+
+      musicToggle.textContent =
+        "🎵";
+
+      musicToggle.classList.add(
+        "playing"
+      );
+
+      musicToggle.setAttribute(
+        "aria-label",
+        "Pause birthday music"
+      );
+
+      musicToggle.setAttribute(
+        "aria-pressed",
+        "true"
+      );
+    }
+  );
+
+
+  player.addEventListener(
+    "pause",
+    () => {
+
+      musicToggle.textContent =
+        "🔇";
+
+      musicToggle.classList.remove(
+        "playing"
+      );
+
+      musicToggle.setAttribute(
+        "aria-label",
+        "Play birthday music"
+      );
+
+      musicToggle.setAttribute(
+        "aria-pressed",
+        "false"
+      );
+    }
+  );
+}
+
+
+/* =========================================================
+   FINAL BIRTHDAY CELEBRATION
+   ========================================================= */
+
+function setupFinalCelebration() {
+
+  const final =
+    document.querySelector(
+      ".final"
+    );
+
+  if (!final) return;
+
+  if (
+    final.dataset.celebrationReady
+  ) {
+    return;
+  }
+
+  final.dataset.celebrationReady =
+    "true";
+
+
+  const observer =
+    new IntersectionObserver(
+      entries => {
+
+        entries.forEach(
+          entry => {
+
+            if (
+              entry.isIntersecting
+            ) {
+
+              final.classList.add(
+                "birthday-finale"
+              );
+
+              confetti(35);
+
+              setTimeout(
+                () => confetti(25),
+                900
+              );
+
+              observer.disconnect();
+            }
+
+          }
+        );
+
+      },
+      {
+        threshold: 0.45
+      }
+    );
+
+
+  observer.observe(final);
+}
+
+
+/* =========================================================
+   DOM READY
    ========================================================= */
 
 document.addEventListener(
   "DOMContentLoaded",
   () => {
+
+    createBirthdayDecorations();
+
+    createBirthdaySurprise();
+
 
     const button =
       document.getElementById(
@@ -657,7 +915,7 @@ document.addEventListener(
 
 
     /* =====================================================
-       TEDDY
+       TEDDY OPENING
        ===================================================== */
 
     if (
@@ -667,17 +925,23 @@ document.addEventListener(
 
       button.addEventListener(
         "click",
-        async () => {
+        async event => {
+
+          event.preventDefault();
 
           button.classList.add(
             "teddy-hug"
+          );
+
+          sparkleBurst(
+            button
           );
 
           content.classList.remove(
             "hidden"
           );
 
-          confetti();
+          confetti(110);
 
 
           /* Start music */
@@ -697,26 +961,6 @@ document.addEventListener(
 
               await player.play();
 
-              if (musicToggle) {
-
-                musicToggle.textContent =
-                  "🎵";
-
-                musicToggle.classList.add(
-                  "playing"
-                );
-
-                musicToggle.setAttribute(
-                  "aria-label",
-                  "Pause birthday music"
-                );
-
-                musicToggle.setAttribute(
-                  "aria-pressed",
-                  "true"
-                );
-              }
-
             } catch (error) {
 
               console.warn(
@@ -731,142 +975,26 @@ document.addEventListener(
             () => {
 
               content.scrollIntoView({
-                behavior:
-                  "smooth",
-                block:
-                  "start"
+                behavior: "smooth",
+                block: "start"
               });
 
             },
-            20
+            150
           );
         }
       );
     }
 
 
-    /* =====================================================
-       MUSIC BUTTON
-       ===================================================== */
-
-    if (
-      musicToggle &&
-      player
-    ) {
-
-      musicToggle.addEventListener(
-        "click",
-        async () => {
-
-          if (
-            player.paused
-          ) {
-
-            try {
-
-              await player.play();
-
-              musicToggle.textContent =
-                "🎵";
-
-              musicToggle.classList.add(
-                "playing"
-              );
-
-              musicToggle.setAttribute(
-                "aria-label",
-                "Pause birthday music"
-              );
-
-              musicToggle.setAttribute(
-                "aria-pressed",
-                "true"
-              );
-
-            } catch (error) {
-
-              console.warn(
-                "Music could not start:",
-                error
-              );
-            }
-
-          } else {
-
-            player.pause();
-
-            musicToggle.textContent =
-              "🔇";
-
-            musicToggle.classList.remove(
-              "playing"
-            );
-
-            musicToggle.setAttribute(
-              "aria-label",
-              "Play birthday music"
-            );
-
-            musicToggle.setAttribute(
-              "aria-pressed",
-              "false"
-            );
-          }
-        }
-      );
-
-
-      player.addEventListener(
-        "play",
-        () => {
-
-          musicToggle.textContent =
-            "🎵";
-
-          musicToggle.classList.add(
-            "playing"
-          );
-
-          musicToggle.setAttribute(
-            "aria-label",
-            "Pause birthday music"
-          );
-
-          musicToggle.setAttribute(
-            "aria-pressed",
-            "true"
-          );
-        }
-      );
-
-
-      player.addEventListener(
-        "pause",
-        () => {
-
-          musicToggle.textContent =
-            "🔇";
-
-          musicToggle.classList.remove(
-            "playing"
-          );
-
-          musicToggle.setAttribute(
-            "aria-label",
-            "Play birthday music"
-          );
-
-          musicToggle.setAttribute(
-            "aria-pressed",
-            "false"
-          );
-        }
-      );
-    }
+    setupMusic(
+      player,
+      musicToggle
+    );
 
 
     /* =====================================================
-       PHOTO VIEWER CONTROLS
+       PHOTO VIEWER
        ===================================================== */
 
     const viewer =
@@ -892,55 +1020,40 @@ document.addEventListener(
         );
 
 
-      if (closeButton) {
-
-        closeButton.addEventListener(
-          "click",
-          closePhotoViewer
-        );
-      }
+      closeButton?.addEventListener(
+        "click",
+        closePhotoViewer
+      );
 
 
-      if (previousButton) {
+      previousButton?.addEventListener(
+        "click",
+        event => {
 
-        previousButton.addEventListener(
-          "click",
-          (event) => {
+          event.stopPropagation();
 
-            event.stopPropagation();
-
-            showPreviousPhoto();
-          }
-        );
-      }
+          showPreviousPhoto();
+        }
+      );
 
 
-      if (nextButton) {
+      nextButton?.addEventListener(
+        "click",
+        event => {
 
-        nextButton.addEventListener(
-          "click",
-          (event) => {
+          event.stopPropagation();
 
-            event.stopPropagation();
+          showNextPhoto();
+        }
+      );
 
-            showNextPhoto();
-          }
-        );
-      }
-
-
-      /*
-       * Click dark background
-       * to close.
-       */
 
       viewer.addEventListener(
         "click",
-        (event) => {
+        event => {
 
           if (
-            event.target ===
-            viewer
+            event.target === viewer
           ) {
 
             closePhotoViewer();
@@ -949,13 +1062,11 @@ document.addEventListener(
       );
 
 
-      /*
-       * Keyboard controls.
-       */
+      /* Keyboard */
 
       document.addEventListener(
         "keydown",
-        (event) => {
+        event => {
 
           if (
             !viewer.classList.contains(
@@ -966,22 +1077,19 @@ document.addEventListener(
           }
 
           if (
-            event.key ===
-            "Escape"
+            event.key === "Escape"
           ) {
 
             closePhotoViewer();
 
           } else if (
-            event.key ===
-            "ArrowLeft"
+            event.key === "ArrowLeft"
           ) {
 
             showPreviousPhoto();
 
           } else if (
-            event.key ===
-            "ArrowRight"
+            event.key === "ArrowRight"
           ) {
 
             showNextPhoto();
@@ -990,28 +1098,24 @@ document.addEventListener(
       );
 
 
-      /* =================================================
-         TOUCH SWIPE
-         ================================================= */
+      /* Swipe */
 
       let touchStartX = 0;
       let touchStartY = 0;
 
       viewer.addEventListener(
         "touchstart",
-        (event) => {
+        event => {
 
           if (
             event.touches.length
           ) {
 
             touchStartX =
-              event.touches[0]
-                .clientX;
+              event.touches[0].clientX;
 
             touchStartY =
-              event.touches[0]
-                .clientY;
+              event.touches[0].clientY;
           }
         },
         {
@@ -1022,7 +1126,7 @@ document.addEventListener(
 
       viewer.addEventListener(
         "touchend",
-        (event) => {
+        event => {
 
           if (
             !event.changedTouches.length
@@ -1030,32 +1134,21 @@ document.addEventListener(
             return;
           }
 
-          const touchEndX =
-            event.changedTouches[0]
-              .clientX;
+          const endX =
+            event.changedTouches[0].clientX;
 
-          const touchEndY =
-            event.changedTouches[0]
-              .clientY;
+          const endY =
+            event.changedTouches[0].clientY;
 
           const deltaX =
-            touchEndX -
-            touchStartX;
+            endX - touchStartX;
 
           const deltaY =
-            touchEndY -
-            touchStartY;
+            endY - touchStartY;
 
-
-          /*
-           * Only treat it as a swipe if
-           * horizontal movement is stronger
-           * than vertical movement.
-           */
 
           if (
-            Math.abs(deltaX) <
-              50 ||
+            Math.abs(deltaX) < 50 ||
             Math.abs(deltaX) <
               Math.abs(deltaY)
           ) {
@@ -1063,14 +1156,9 @@ document.addEventListener(
           }
 
 
-          if (
-            deltaX < 0
-          ) {
-
+          if (deltaX < 0) {
             showNextPhoto();
-
           } else {
-
             showPreviousPhoto();
           }
 
@@ -1082,16 +1170,24 @@ document.addEventListener(
     }
 
 
-    /* Load everything */
+    /* =====================================================
+       LOAD
+       ===================================================== */
 
     loadMedia();
+
+    loadSiteContent();
+
+    setupScrollAnimations();
+
+    setupFinalCelebration();
 
   }
 );
 
 
 /* =========================================================
-   EDITABLE LETTER + FINAL NOTE
+   EDITABLE CONTENT
    ========================================================= */
 
 async function loadSiteContent() {
@@ -1131,67 +1227,55 @@ async function loadSiteContent() {
       );
 
 
+    const letter =
+      document.getElementById(
+        "letterContent"
+      );
+
     if (
+      letter &&
       map.letter_html
     ) {
 
-      const element =
-        document.getElementById(
-          "letterContent"
-        );
-
-      if (element) {
-
-        element.innerHTML =
-          map.letter_html;
-      }
+      letter.innerHTML =
+        map.letter_html;
     }
 
 
+    const title =
+      document.getElementById(
+        "finalNoteTitle"
+      );
+
     if (
+      title &&
       map.final_note_title
     ) {
 
-      const element =
-        document.getElementById(
-          "finalNoteTitle"
-        );
-
-      if (element) {
-
-        element.innerHTML =
-          map.final_note_title;
-      }
+      title.innerHTML =
+        map.final_note_title;
     }
 
 
+    const caption =
+      document.getElementById(
+        "finalNoteCaption"
+      );
+
     if (
+      caption &&
       map.final_note_caption
     ) {
 
-      const element =
-        document.getElementById(
-          "finalNoteCaption"
-        );
-
-      if (element) {
-
-        element.textContent =
-          map.final_note_caption;
-      }
+      caption.textContent =
+        map.final_note_caption;
     }
 
   } catch (error) {
 
     console.warn(
-      "Editable text is unavailable; using built-in text.",
+      "Editable text unavailable:",
       error
     );
   }
 }
-
-
-document.addEventListener(
-  "DOMContentLoaded",
-  loadSiteContent
-);
