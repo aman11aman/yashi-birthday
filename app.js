@@ -16,13 +16,9 @@ function publicUrl(client, path) {
     .data.publicUrl;
 }
 
-
-/* =========================================================
-   GLOBAL PHOTO DATA
-   ========================================================= */
-
 let birthdayPhotos = [];
 let currentPhotoIndex = 0;
+let photoTransitioning = false;
 
 
 /* =========================================================
@@ -91,9 +87,6 @@ async function loadMedia() {
 
             box.className = "photo";
 
-            /*
-             * Keep the existing layout variations.
-             */
             if (index === 1) {
               box.classList.add("tall");
             }
@@ -102,10 +95,6 @@ async function loadMedia() {
               box.classList.add("wide");
             }
 
-            /*
-             * Make it obvious that the
-             * photo can be opened.
-             */
             box.setAttribute(
               "role",
               "button"
@@ -141,9 +130,8 @@ async function loadMedia() {
             gallery.appendChild(box);
 
 
-            /*
-             * Photo reveal animation.
-             */
+            /* Photo entrance animation */
+
             setTimeout(
               () => {
                 box.classList.add(
@@ -157,9 +145,8 @@ async function loadMedia() {
             );
 
 
-            /*
-             * Open photo viewer.
-             */
+            /* Open viewer */
+
             box.addEventListener(
               "click",
               () => {
@@ -168,9 +155,8 @@ async function loadMedia() {
             );
 
 
-            /*
-             * Keyboard accessibility.
-             */
+            /* Keyboard */
+
             box.addEventListener(
               "keydown",
               (event) => {
@@ -259,7 +245,9 @@ function getPhotoViewer() {
 }
 
 
-function updatePhotoViewer() {
+function updatePhotoViewer(
+  direction = "next"
+) {
 
   const viewer =
     getPhotoViewer();
@@ -288,19 +276,44 @@ function updatePhotoViewer() {
   const client =
     getClient();
 
-  if (image) {
 
-    image.src =
-      publicUrl(
-        client,
-        photo.file_path
-      );
+  /*
+   * Prepare the new image.
+   */
 
-    image.alt =
-      `Birthday memory ${
-        currentPhotoIndex + 1
-      }`;
-  }
+  const newSrc =
+    publicUrl(
+      client,
+      photo.file_path
+    );
+
+
+  /*
+   * Add direction information.
+   */
+
+  viewer.setAttribute(
+    "data-direction",
+    direction
+  );
+
+
+  /*
+   * Change the image source.
+   */
+
+  image.src =
+    newSrc;
+
+  image.alt =
+    `Birthday memory ${
+      currentPhotoIndex + 1
+    }`;
+
+
+  /*
+   * Update counter.
+   */
 
   if (counter) {
 
@@ -334,7 +347,14 @@ function openPhotoViewer(index) {
     return;
   }
 
-  updatePhotoViewer();
+  viewer.setAttribute(
+    "data-direction",
+    "none"
+  );
+
+  updatePhotoViewer(
+    "none"
+  );
 
   viewer.classList.add(
     "open"
@@ -365,38 +385,167 @@ function closePhotoViewer() {
 }
 
 
-function showPreviousPhoto() {
+/* =========================================================
+   ANIMATED PHOTO CHANGE
+   ========================================================= */
 
-  if (!birthdayPhotos.length) {
+function changePhoto(
+  direction
+) {
+
+  if (
+    !birthdayPhotos.length ||
+    photoTransitioning
+  ) {
     return;
   }
 
-  currentPhotoIndex =
-    (
-      currentPhotoIndex -
-      1 +
-      birthdayPhotos.length
-    ) %
-    birthdayPhotos.length;
+  const viewer =
+    getPhotoViewer();
 
-  updatePhotoViewer();
+  if (!viewer) {
+    return;
+  }
+
+  const image =
+    viewer.querySelector(
+      ".photo-viewer-image"
+    );
+
+  if (!image) {
+    return;
+  }
+
+  photoTransitioning = true;
+
+
+  /*
+   * Direction:
+   *
+   * next = photo moves left
+   * previous = photo moves right
+   */
+
+  const animationClass =
+    direction === "next"
+      ? "slide-out-left"
+      : "slide-out-right";
+
+  image.classList.add(
+    animationClass
+  );
+
+
+  /*
+   * Wait for the old image
+   * to slide away.
+   */
+
+  setTimeout(
+    () => {
+
+      if (
+        direction === "next"
+      ) {
+
+        currentPhotoIndex =
+          (
+            currentPhotoIndex +
+            1
+          ) %
+          birthdayPhotos.length;
+
+      } else {
+
+        currentPhotoIndex =
+          (
+            currentPhotoIndex -
+            1 +
+            birthdayPhotos.length
+          ) %
+          birthdayPhotos.length;
+      }
+
+
+      /*
+       * Remove old animation.
+       */
+
+      image.classList.remove(
+        "slide-out-left",
+        "slide-out-right"
+      );
+
+
+      /*
+       * Update the photo.
+       */
+
+      updatePhotoViewer(
+        direction
+      );
+
+
+      /*
+       * Start new photo
+       * from opposite side.
+       */
+
+      const slideInClass =
+        direction === "next"
+          ? "slide-in-right"
+          : "slide-in-left";
+
+      image.classList.add(
+        slideInClass
+      );
+
+
+      /*
+       * Force browser to recognize
+       * the starting position.
+       */
+
+      void image.offsetWidth;
+
+
+      /*
+       * Animate into center.
+       */
+
+      requestAnimationFrame(
+        () => {
+
+          image.classList.remove(
+            slideInClass
+          );
+        }
+      );
+
+
+      setTimeout(
+        () => {
+
+          photoTransitioning =
+            false;
+
+        },
+        430
+      );
+
+    },
+    300
+  );
+}
+
+
+function showPreviousPhoto() {
+  changePhoto("previous");
 }
 
 
 function showNextPhoto() {
-
-  if (!birthdayPhotos.length) {
-    return;
-  }
-
-  currentPhotoIndex =
-    (
-      currentPhotoIndex +
-      1
-    ) %
-    birthdayPhotos.length;
-
-  updatePhotoViewer();
+  changePhoto("next");
 }
 
 
@@ -531,9 +680,7 @@ document.addEventListener(
           confetti();
 
 
-          /* -------------------------
-             START MUSIC
-             ------------------------- */
+          /* Start music */
 
           if (
             player &&
@@ -579,10 +726,6 @@ document.addEventListener(
             }
           }
 
-
-          /* -------------------------
-             SCROLL
-             ------------------------- */
 
           setTimeout(
             () => {
@@ -787,8 +930,8 @@ document.addEventListener(
 
 
       /*
-       * Clicking the dark background
-       * closes the viewer.
+       * Click dark background
+       * to close.
        */
 
       viewer.addEventListener(
@@ -807,7 +950,7 @@ document.addEventListener(
 
 
       /*
-       * Keyboard navigation.
+       * Keyboard controls.
        */
 
       document.addEventListener(
@@ -847,15 +990,12 @@ document.addEventListener(
       );
 
 
-      /*
-       * Touch/swipe support.
-       */
+      /* =================================================
+         TOUCH SWIPE
+         ================================================= */
 
-      let touchStartX =
-        0;
-
-      let touchEndX =
-        0;
+      let touchStartX = 0;
+      let touchStartY = 0;
 
       viewer.addEventListener(
         "touchstart",
@@ -868,6 +1008,10 @@ document.addEventListener(
             touchStartX =
               event.touches[0]
                 .clientX;
+
+            touchStartY =
+              event.touches[0]
+                .clientY;
           }
         },
         {
@@ -881,39 +1025,55 @@ document.addEventListener(
         (event) => {
 
           if (
-            event.changedTouches.length
+            !event.changedTouches.length
+          ) {
+            return;
+          }
+
+          const touchEndX =
+            event.changedTouches[0]
+              .clientX;
+
+          const touchEndY =
+            event.changedTouches[0]
+              .clientY;
+
+          const deltaX =
+            touchEndX -
+            touchStartX;
+
+          const deltaY =
+            touchEndY -
+            touchStartY;
+
+
+          /*
+           * Only treat it as a swipe if
+           * horizontal movement is stronger
+           * than vertical movement.
+           */
+
+          if (
+            Math.abs(deltaX) <
+              50 ||
+            Math.abs(deltaX) <
+              Math.abs(deltaY)
+          ) {
+            return;
+          }
+
+
+          if (
+            deltaX < 0
           ) {
 
-            touchEndX =
-              event.changedTouches[0]
-                .clientX;
+            showNextPhoto();
 
-            const distance =
-              touchEndX -
-              touchStartX;
+          } else {
 
-            /*
-             * Minimum swipe distance.
-             */
-
-            if (
-              Math.abs(distance) <
-              50
-            ) {
-              return;
-            }
-
-            if (
-              distance < 0
-            ) {
-
-              showNextPhoto();
-
-            } else {
-
-              showPreviousPhoto();
-            }
+            showPreviousPhoto();
           }
+
         },
         {
           passive: true
@@ -922,9 +1082,7 @@ document.addEventListener(
     }
 
 
-    /* =====================================================
-       LOAD MEDIA
-       ===================================================== */
+    /* Load everything */
 
     loadMedia();
 
@@ -973,10 +1131,6 @@ async function loadSiteContent() {
       );
 
 
-    /* -------------------------
-       LETTER
-       ------------------------- */
-
     if (
       map.letter_html
     ) {
@@ -994,10 +1148,6 @@ async function loadSiteContent() {
     }
 
 
-    /* -------------------------
-       FINAL NOTE TITLE
-       ------------------------- */
-
     if (
       map.final_note_title
     ) {
@@ -1014,10 +1164,6 @@ async function loadSiteContent() {
       }
     }
 
-
-    /* -------------------------
-       FINAL NOTE CAPTION
-       ------------------------- */
 
     if (
       map.final_note_caption
@@ -1044,10 +1190,6 @@ async function loadSiteContent() {
   }
 }
 
-
-/* =========================================================
-   LOAD EDITABLE CONTENT
-   ========================================================= */
 
 document.addEventListener(
   "DOMContentLoaded",
