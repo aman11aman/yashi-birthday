@@ -3,299 +3,670 @@ const SUPABASE_KEY = "sb_publishable_o8YYHkc9w4NzqBvJv8FjkQ_8FXaKGfm";
 const BUCKET = "birthday-media";
 
 function getClient() {
-  return window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  return window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
 }
 
 function publicUrl(client, path) {
-  return client.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+  return client.storage
+    .from(BUCKET)
+    .getPublicUrl(path)
+    .data.publicUrl;
 }
 
+
+/* =========================================================
+   LOAD PHOTOS, COLLAGE & MUSIC
+   ========================================================= */
+
 async function loadMedia() {
-  const galleryStatus = document.getElementById("galleryStatus");
+  const galleryStatus =
+    document.getElementById("galleryStatus");
+
   try {
-    if (!window.supabase) throw new Error("Supabase library unavailable.");
+    if (!window.supabase) {
+      throw new Error("Supabase library unavailable.");
+    }
+
     const client = getClient();
+
     const result = await client
       .from("birthday_media")
       .select("*")
-      .order("display_order", { ascending: true })
-      .order("created_at", { ascending: true });
+      .order("display_order", {
+        ascending: true
+      })
+      .order("created_at", {
+        ascending: true
+      });
 
-    if (result.error) throw result.error;
+    if (result.error) {
+      throw result.error;
+    }
 
     const data = result.data || [];
-    const photos = data.filter(item => item.type === "photo");
-    const collage = data.find(item => item.type === "collage");
-    const music = data.find(item => item.type === "music");
-    const gallery = document.getElementById("gallery");
 
-    gallery.innerHTML = "";
+    const photos = data.filter(
+      item => item.type === "photo"
+    );
 
-    if (!photos.length) {
-      gallery.innerHTML = '<div class="empty">📸<br><b>Memories coming soon...</b></div>';
-    } else {
-      photos.forEach((photo, index) => {
-        const box = document.createElement("div");
-        box.className = "photo";
-        if (index === 1) box.classList.add("tall");
-        if (index === 3) box.classList.add("wide");
+    const collage = data.find(
+      item => item.type === "collage"
+    );
 
-        const img = document.createElement("img");
-        img.src = publicUrl(client, photo.file_path);
-        img.alt = "A memory";
-        img.loading = "lazy";
-        box.appendChild(img);
-        gallery.appendChild(box);
-      });
+    const music = data.find(
+      item => item.type === "music"
+    );
+
+    /* -------------------------
+       PHOTOS
+       ------------------------- */
+
+    const gallery =
+      document.getElementById("gallery");
+
+    if (gallery) {
+
+      gallery.innerHTML = "";
+
+      if (!photos.length) {
+
+        gallery.innerHTML =
+          '<div class="empty">📸<br><b>Memories coming soon...</b></div>';
+
+      } else {
+
+        photos.forEach((photo, index) => {
+
+          const box =
+            document.createElement("div");
+
+          box.className = "photo";
+
+          if (index === 1) {
+            box.classList.add("tall");
+          }
+
+          if (index === 3) {
+            box.classList.add("wide");
+          }
+
+          const img =
+            document.createElement("img");
+
+          img.src =
+            publicUrl(
+              client,
+              photo.file_path
+            );
+
+          img.alt = "A memory";
+
+          img.loading = "lazy";
+
+          box.appendChild(img);
+
+          gallery.appendChild(box);
+        });
+      }
     }
 
-    galleryStatus.textContent = photos.length
-      ? photos.length + " little memories"
-      : "A few memories are waiting to be added.";
+    if (galleryStatus) {
+
+      galleryStatus.textContent =
+        photos.length
+          ? photos.length +
+            " little memories"
+          : "A few memories are waiting to be added.";
+    }
+
+
+    /* -------------------------
+       COLLAGE
+       ------------------------- */
 
     if (collage) {
-      const box = document.getElementById("collageBox");
-      box.innerHTML = "";
-      const img = document.createElement("img");
-      img.src = publicUrl(client, collage.file_path);
-      img.alt = "Yashi's collage";
-      img.loading = "lazy";
-      box.appendChild(img);
+
+      const box =
+        document.getElementById(
+          "collageBox"
+        );
+
+      if (box) {
+
+        box.innerHTML = "";
+
+        const img =
+          document.createElement("img");
+
+        img.src =
+          publicUrl(
+            client,
+            collage.file_path
+          );
+
+        img.alt =
+          "Yashi's collage";
+
+        img.loading = "lazy";
+
+        box.appendChild(img);
+      }
     }
+
+
+    /* -------------------------
+       BACKGROUND MUSIC
+       ------------------------- */
 
     if (music) {
-      document.getElementById("player").src = publicUrl(client, music.file_path);
+
+      const player =
+        document.getElementById(
+          "player"
+        );
+
+      if (player) {
+
+        player.src =
+          publicUrl(
+            client,
+            music.file_path
+          );
+
+        player.loop = true;
+
+        /*
+         * Keep the music soft in the background.
+         */
+        player.volume = 0.55;
+
+        player.preload = "auto";
+      }
     }
+
   } catch (error) {
-    console.warn("Media is unavailable right now:", error);
+
+    console.warn(
+      "Media is unavailable right now:",
+      error
+    );
+
     if (galleryStatus) {
-      galleryStatus.textContent = "Your memories will appear here soon. ❤️";
+
+      galleryStatus.textContent =
+        "Your memories will appear here soon. ❤️";
     }
   }
 }
 
-function confetti() {
-  const container = document.getElementById("confetti");
-  for (let i = 0; i < 90; i++) {
-    const piece = document.createElement("i");
-    piece.className = "confetti-piece";
-    piece.style.left = Math.random() * 100 + "vw";
-    piece.style.setProperty("--x", (Math.random() * 260 - 130) + "px");
-    piece.style.animationDuration = (2.8 + Math.random() * 2.8) + "s";
-    piece.style.animationDelay = (Math.random() * 0.35) + "s";
-    piece.style.background = ["#ff7d9b", "#ffd166", "#7fd1b9", "#8bb8ff", "#c8a1ff"][Math.floor(Math.random() * 5)];
-    container.appendChild(piece);
-    setTimeout(() => piece.remove(), 6500);
-  }
-}
 
-document.addEventListener("DOMContentLoaded", () => {
-  // The landing button is a real anchor to #content, so it works
-  // even if Supabase or this script fails.
-  const button = document.getElementById("openBtn");
-  const content = document.getElementById("content");
-
-  if (button && content) {
-    button.addEventListener("click", () => {
-      button.classList.add("teddy-hug");
-      content.classList.remove("hidden");
-      setTimeout(() => content.scrollIntoView({ behavior: "smooth", block: "start" }), 20);
-      confetti();
-    });
-  }
-
-  // Never let media errors affect the landing page.
-  loadMedia();
-});
-
-async function loadSiteContent() {
-  try {
-    if (!window.supabase) return;
-    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    const { data, error } = await client.from("site_content").select("key,value");
-    if (error) throw error;
-    const map = Object.fromEntries((data || []).map(row => [row.key, row.value]));
-    if (map.letter_html) {
-      const el = document.getElementById("letterContent");
-      if (el) el.innerHTML = map.letter_html;
-    }
-    if (map.final_note_title) {
-      const el = document.getElementById("finalNoteTitle");
-      if (el) el.innerHTML = map.final_note_title;
-    }
-    if (map.final_note_caption) {
-      const el = document.getElementById("finalNoteCaption");
-      if (el) el.textContent = map.final_note_caption;
-    }
-  } catch (e) {
-    console.warn("Editable text is unavailable; using built-in text.", e);
-  }
-}
-document.addEventListener("DOMContentLoaded", loadSiteContent);
 /* =========================================================
-   BIRTHDAY ANIMATION ENGINE
+   CONFETTI
    ========================================================= */
 
-document.addEventListener("DOMContentLoaded", () => {
+function confetti() {
 
-  /*
-   * Scroll reveal
-   */
-  const revealTargets = document.querySelectorAll(
-    "main > section, .letter, .music, .collagebox, .note"
-  );
+  const container =
+    document.getElementById(
+      "confetti"
+    );
 
-  revealTargets.forEach((element) => {
-    element.classList.add("reveal");
-  });
+  if (!container) return;
+
+  for (let i = 0; i < 90; i++) {
+
+    const piece =
+      document.createElement("i");
+
+    piece.className =
+      "confetti-piece";
+
+    piece.style.left =
+      Math.random() * 100 + "vw";
+
+    piece.style.setProperty(
+      "--x",
+      (Math.random() * 260 - 130) +
+        "px"
+    );
+
+    piece.style.animationDuration =
+      (2.8 + Math.random() * 2.8) +
+      "s";
+
+    piece.style.animationDelay =
+      Math.random() * 0.35 +
+      "s";
+
+    piece.style.background =
+      [
+        "#ff7d9b",
+        "#ffd166",
+        "#7fd1b9",
+        "#8bb8ff",
+        "#c8a1ff"
+      ][
+        Math.floor(
+          Math.random() * 5
+        )
+      ];
+
+    container.appendChild(
+      piece
+    );
+
+    setTimeout(
+      () => piece.remove(),
+      6500
+    );
+  }
+}
 
 
-  /*
-   * Reveal elements when they enter the screen
-   */
-  const revealObserver = new IntersectionObserver(
-    (entries, observer) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
+/* =========================================================
+   BIRTHDAY EXPERIENCE
+   ========================================================= */
 
-        entry.target.classList.add("visible");
-        observer.unobserve(entry.target);
-      });
-    },
-    {
-      threshold: 0.14,
-      rootMargin: "0px 0px -60px 0px"
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+
+    const button =
+      document.getElementById(
+        "openBtn"
+      );
+
+    const content =
+      document.getElementById(
+        "content"
+      );
+
+    const player =
+      document.getElementById(
+        "player"
+      );
+
+    const musicToggle =
+      document.getElementById(
+        "musicToggle"
+      );
+
+
+    /* =====================================================
+       TEDDY CLICK
+       ===================================================== */
+
+    if (button && content) {
+
+      button.addEventListener(
+        "click",
+        async () => {
+
+          /*
+           * Teddy animation
+           */
+          button.classList.add(
+            "teddy-hug"
+          );
+
+
+          /*
+           * Open birthday content
+           */
+          content.classList.remove(
+            "hidden"
+          );
+
+
+          /*
+           * Birthday confetti
+           */
+          confetti();
+
+
+          /*
+           * Start the birthday song.
+           *
+           * This works because the teddy click
+           * is a real user interaction, which
+           * browsers allow to start audio.
+           */
+
+          if (
+            player &&
+            player.src
+          ) {
+
+            try {
+
+              player.volume = 0.55;
+
+              player.loop = true;
+
+              await player.play();
+
+
+              /*
+               * Update floating music button
+               */
+
+              if (musicToggle) {
+
+                musicToggle.textContent =
+                  "🎵";
+
+                musicToggle.classList.add(
+                  "playing"
+                );
+
+                musicToggle.setAttribute(
+                  "aria-label",
+                  "Pause birthday music"
+                );
+
+                musicToggle.setAttribute(
+                  "aria-pressed",
+                  "true"
+                );
+              }
+
+            } catch (error) {
+
+              console.warn(
+                "Music could not start:",
+                error
+              );
+            }
+          }
+
+
+          /*
+           * Smoothly move into the birthday
+           */
+          setTimeout(
+            () => {
+
+              content.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+              });
+
+            },
+            20
+          );
+        }
+      );
     }
-  );
-
-  revealTargets.forEach((element) => {
-    revealObserver.observe(element);
-  });
 
 
-  /*
-   * Photo-by-photo entrance
-   */
-  const gallery = document.getElementById("gallery");
+    /* =====================================================
+       FLOATING MUSIC BUTTON
+       ===================================================== */
 
-  if (gallery) {
-    const galleryObserver = new MutationObserver(() => {
+    if (
+      musicToggle &&
+      player
+    ) {
 
-      const photos = gallery.querySelectorAll(".photo");
+      musicToggle.addEventListener(
+        "click",
+        async () => {
 
-      photos.forEach((photo, index) => {
-        photo.classList.add("reveal");
+          /*
+           * If music is paused,
+           * start it again.
+           */
 
-        photo.style.transitionDelay =
-          Math.min(index * 90, 500) + "ms";
+          if (player.paused) {
 
-        revealObserver.observe(photo);
-      });
+            try {
 
-    });
+              await player.play();
 
-    galleryObserver.observe(gallery, {
-      childList: true,
-      subtree: true
-    });
+              musicToggle.textContent =
+                "🎵";
+
+              musicToggle.classList.add(
+                "playing"
+              );
+
+              musicToggle.setAttribute(
+                "aria-label",
+                "Pause birthday music"
+              );
+
+              musicToggle.setAttribute(
+                "aria-pressed",
+                "true"
+              );
+
+            } catch (error) {
+
+              console.warn(
+                "Music could not start:",
+                error
+              );
+            }
+
+          }
+
+          /*
+           * Otherwise pause it.
+           */
+
+          else {
+
+            player.pause();
+
+            musicToggle.textContent =
+              "🔇";
+
+            musicToggle.classList.remove(
+              "playing"
+            );
+
+            musicToggle.setAttribute(
+              "aria-label",
+              "Play birthday music"
+            );
+
+            musicToggle.setAttribute(
+              "aria-pressed",
+              "false"
+            );
+          }
+        }
+      );
+
+
+      /*
+       * Keep button state synchronized
+       * with the audio player.
+       */
+
+      player.addEventListener(
+        "play",
+        () => {
+
+          musicToggle.textContent =
+            "🎵";
+
+          musicToggle.classList.add(
+            "playing"
+          );
+
+          musicToggle.setAttribute(
+            "aria-label",
+            "Pause birthday music"
+          );
+
+          musicToggle.setAttribute(
+            "aria-pressed",
+            "true"
+          );
+        }
+      );
+
+
+      player.addEventListener(
+        "pause",
+        () => {
+
+          musicToggle.textContent =
+            "🔇";
+
+          musicToggle.classList.remove(
+            "playing"
+          );
+
+          musicToggle.setAttribute(
+            "aria-label",
+            "Play birthday music"
+          );
+
+          musicToggle.setAttribute(
+            "aria-pressed",
+            "false"
+          );
+        }
+      );
+    }
+
+
+    /* =====================================================
+       LOAD MEDIA
+       ===================================================== */
 
     /*
-     * Handle photos already present
+     * Media errors should never prevent
+     * the birthday landing page from working.
      */
-    gallery.querySelectorAll(".photo").forEach((photo, index) => {
-      photo.classList.add("reveal");
 
-      photo.style.transitionDelay =
-        Math.min(index * 90, 500) + "ms";
+    loadMedia();
 
-      revealObserver.observe(photo);
-    });
   }
+);
 
 
-  /*
-   * Music animation
-   */
-  const player = document.getElementById("player");
-  const musicCard = document.querySelector(".music");
+/* =========================================================
+   EDITABLE LETTER & FINAL NOTE
+   ========================================================= */
 
-  if (player && musicCard) {
+async function loadSiteContent() {
 
-    player.addEventListener("play", () => {
-      musicCard.classList.add("is-playing");
-    });
+  try {
 
-    player.addEventListener("pause", () => {
-      musicCard.classList.remove("is-playing");
-    });
-
-    player.addEventListener("ended", () => {
-      musicCard.classList.remove("is-playing");
-    });
-  }
-
-
-  /*
-   * Little celebration when the teddy is opened
-   *
-   * This complements the existing confetti function
-   * without replacing it.
-   */
-  const teddy = document.querySelector(".teddy");
-
-  if (teddy) {
-    teddy.addEventListener("click", () => {
-
-      teddy.classList.remove("teddy-hug");
-
-      void teddy.offsetWidth;
-
-      teddy.classList.add("teddy-hug");
-
-      setTimeout(() => {
-        teddy.classList.remove("teddy-hug");
-      }, 1400);
-
-    });
-  }
-
-
-  /*
-   * Add a few tiny birthday sparkles to the hero.
-   */
-  const hero = document.querySelector(".hero");
-
-  if (hero) {
-
-    const sparkleCharacters = ["✦", "✧", "•", "✦", "·"];
-
-    for (let i = 0; i < 18; i++) {
-
-      const sparkle = document.createElement("span");
-
-      sparkle.className = "birthday-sparkle";
-
-      sparkle.textContent =
-        sparkleCharacters[
-          Math.floor(
-            Math.random() * sparkleCharacters.length
-          )
-        ];
-
-      sparkle.style.left =
-        Math.random() * 100 + "%";
-
-      sparkle.style.top =
-        8 + Math.random() * 82 + "%";
-
-      sparkle.style.animationDelay =
-        Math.random() * 4 + "s";
-
-      sparkle.style.animationDuration =
-        3.5 + Math.random() * 3 + "s";
-
-      hero.appendChild(sparkle);
+    if (!window.supabase) {
+      return;
     }
-  }
 
-});
+    const client =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
+
+    const {
+      data,
+      error
+    } =
+      await client
+        .from("site_content")
+        .select("key,value");
+
+    if (error) {
+      throw error;
+    }
+
+    const map =
+      Object.fromEntries(
+        (data || []).map(
+          row => [
+            row.key,
+            row.value
+          ]
+        )
+      );
+
+
+    /* -------------------------
+       LETTER
+       ------------------------- */
+
+    if (map.letter_html) {
+
+      const el =
+        document.getElementById(
+          "letterContent"
+        );
+
+      if (el) {
+
+        el.innerHTML =
+          map.letter_html;
+      }
+    }
+
+
+    /* -------------------------
+       FINAL NOTE TITLE
+       ------------------------- */
+
+    if (
+      map.final_note_title
+    ) {
+
+      const el =
+        document.getElementById(
+          "finalNoteTitle"
+        );
+
+      if (el) {
+
+        el.innerHTML =
+          map.final_note_title;
+      }
+    }
+
+
+    /* -------------------------
+       FINAL NOTE CAPTION
+       ------------------------- */
+
+    if (
+      map.final_note_caption
+    ) {
+
+      const el =
+        document.getElementById(
+          "finalNoteCaption"
+        );
+
+      if (el) {
+
+        el.textContent =
+          map.final_note_caption;
+      }
+    }
+
+  } catch (error) {
+
+    console.warn(
+      "Editable text is unavailable; using built-in text.",
+      error
+    );
+  }
+}
+
+
+/* =========================================================
+   LOAD EDITABLE CONTENT
+   ========================================================= */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  loadSiteContent
+);
