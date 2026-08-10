@@ -52,13 +52,10 @@ async function loadMedia() {
       item => item.type === "photo"
     );
 
-    const collage = data.find(
-      item => item.type === "collage"
-    );
-
     const music = data.find(
       item => item.type === "music"
     );
+
 
     /* -------------------------
        PHOTOS
@@ -102,13 +99,28 @@ async function loadMedia() {
               photo.file_path
             );
 
-          img.alt = "A memory";
+          img.alt =
+            "A birthday memory";
 
-          img.loading = "lazy";
+          img.loading =
+            "lazy";
 
           box.appendChild(img);
 
           gallery.appendChild(box);
+
+          /*
+           * Reveal the photo after it has
+           * been added to the page.
+           *
+           * This is important because our
+           * animation CSS starts photos at
+           * opacity: 0.
+           */
+          setTimeout(() => {
+            box.classList.add("visible");
+          }, Math.min(index * 120, 700));
+
         });
       }
     }
@@ -120,40 +132,6 @@ async function loadMedia() {
           ? photos.length +
             " little memories"
           : "A few memories are waiting to be added.";
-    }
-
-
-    /* -------------------------
-       COLLAGE
-       ------------------------- */
-
-    if (collage) {
-
-      const box =
-        document.getElementById(
-          "collageBox"
-        );
-
-      if (box) {
-
-        box.innerHTML = "";
-
-        const img =
-          document.createElement("img");
-
-        img.src =
-          publicUrl(
-            client,
-            collage.file_path
-          );
-
-        img.alt =
-          "Yashi's collage";
-
-        img.loading = "lazy";
-
-        box.appendChild(img);
-      }
     }
 
 
@@ -178,9 +156,6 @@ async function loadMedia() {
 
         player.loop = true;
 
-        /*
-         * Keep the music soft in the background.
-         */
         player.volume = 0.55;
 
         player.preload = "auto";
@@ -305,35 +280,20 @@ document.addEventListener(
         "click",
         async () => {
 
-          /*
-           * Teddy animation
-           */
           button.classList.add(
             "teddy-hug"
           );
 
-
-          /*
-           * Open birthday content
-           */
           content.classList.remove(
             "hidden"
           );
 
-
-          /*
-           * Birthday confetti
-           */
           confetti();
 
 
-          /*
-           * Start the birthday song.
-           *
-           * This works because the teddy click
-           * is a real user interaction, which
-           * browsers allow to start audio.
-           */
+          /* -------------------------
+             START MUSIC
+             ------------------------- */
 
           if (
             player &&
@@ -347,11 +307,6 @@ document.addEventListener(
               player.loop = true;
 
               await player.play();
-
-
-              /*
-               * Update floating music button
-               */
 
               if (musicToggle) {
 
@@ -383,9 +338,10 @@ document.addEventListener(
           }
 
 
-          /*
-           * Smoothly move into the birthday
-           */
+          /* -------------------------
+             SCROLL TO CONTENT
+             ------------------------- */
+
           setTimeout(
             () => {
 
@@ -414,11 +370,6 @@ document.addEventListener(
       musicToggle.addEventListener(
         "click",
         async () => {
-
-          /*
-           * If music is paused,
-           * start it again.
-           */
 
           if (player.paused) {
 
@@ -451,13 +402,7 @@ document.addEventListener(
               );
             }
 
-          }
-
-          /*
-           * Otherwise pause it.
-           */
-
-          else {
+          } else {
 
             player.pause();
 
@@ -481,11 +426,6 @@ document.addEventListener(
         }
       );
 
-
-      /*
-       * Keep button state synchronized
-       * with the audio player.
-       */
 
       player.addEventListener(
         "play",
@@ -539,11 +479,6 @@ document.addEventListener(
     /* =====================================================
        LOAD MEDIA
        ===================================================== */
-
-    /*
-     * Media errors should never prevent
-     * the birthday landing page from working.
-     */
 
     loadMedia();
 
@@ -604,7 +539,6 @@ async function loadSiteContent() {
         );
 
       if (el) {
-
         el.innerHTML =
           map.letter_html;
       }
@@ -625,7 +559,6 @@ async function loadSiteContent() {
         );
 
       if (el) {
-
         el.innerHTML =
           map.final_note_title;
       }
@@ -646,7 +579,6 @@ async function loadSiteContent() {
         );
 
       if (el) {
-
         el.textContent =
           map.final_note_caption;
       }
