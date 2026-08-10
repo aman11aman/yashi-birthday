@@ -647,3 +647,284 @@ footer {
     animation: none;
   }
 }
+/* =========================================================
+   FULL-SCREEN PHOTO VIEWER
+   ========================================================= */
+
+.photo-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 30px;
+
+  background: rgba(25, 22, 28, 0.94);
+
+  opacity: 0;
+  visibility: hidden;
+
+  pointer-events: none;
+
+  transition:
+    opacity 0.3s ease,
+    visibility 0.3s ease;
+}
+
+.photo-viewer.open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+
+/* Prevent the page from scrolling while a photo is open */
+
+body.photo-viewer-open {
+  overflow: hidden;
+}
+
+
+/* =========================================================
+   IMAGE
+   ========================================================= */
+
+.photo-viewer-content {
+  position: relative;
+
+  width: min(90vw, 1100px);
+  height: min(86vh, 800px);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.photo-viewer-image {
+  display: block;
+
+  max-width: 100%;
+  max-height: 100%;
+
+  width: auto;
+  height: auto;
+
+  object-fit: contain;
+
+  border-radius: 14px;
+
+  box-shadow:
+    0 25px 80px rgba(0, 0, 0, 0.45);
+
+  opacity: 0;
+  transform: scale(0.88);
+
+  transition:
+    opacity 0.35s ease,
+    transform 0.4s cubic-bezier(.2,.8,.2,1);
+}
+
+.photo-viewer.open .photo-viewer-image {
+  opacity: 1;
+  transform: scale(1);
+}
+
+
+/* =========================================================
+   CLOSE BUTTON
+   ========================================================= */
+
+.photo-viewer-close {
+  position: absolute;
+
+  top: 20px;
+  right: 25px;
+
+  width: 48px;
+  height: 48px;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: rgba(255,255,255,.12);
+  color: white;
+
+  font-size: 32px;
+  line-height: 1;
+
+  cursor: pointer;
+
+  display: grid;
+  place-items: center;
+
+  transition:
+    background .25s ease,
+    transform .25s ease;
+}
+
+.photo-viewer-close:hover {
+  background: rgba(255,255,255,.22);
+  transform: scale(1.08);
+}
+
+
+/* =========================================================
+   PREVIOUS / NEXT
+   ========================================================= */
+
+.photo-viewer-prev,
+.photo-viewer-next {
+  position: absolute;
+
+  top: 50%;
+  transform: translateY(-50%);
+
+  width: 52px;
+  height: 52px;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: rgba(255,255,255,.12);
+  color: white;
+
+  font-size: 42px;
+  line-height: 1;
+
+  cursor: pointer;
+
+  display: grid;
+  place-items: center;
+
+  transition:
+    background .25s ease,
+    transform .25s ease;
+}
+
+.photo-viewer-prev {
+  left: 25px;
+}
+
+.photo-viewer-next {
+  right: 25px;
+}
+
+.photo-viewer-prev:hover,
+.photo-viewer-next:hover {
+  background: rgba(255,255,255,.22);
+}
+
+.photo-viewer-prev:hover {
+  transform:
+    translateY(-50%)
+    translateX(-3px);
+}
+
+.photo-viewer-next:hover {
+  transform:
+    translateY(-50%)
+    translateX(3px);
+}
+
+
+/* =========================================================
+   PHOTO COUNTER
+   ========================================================= */
+
+.photo-viewer-counter {
+  position: absolute;
+
+  left: 50%;
+  bottom: -34px;
+
+  transform: translateX(-50%);
+
+  color: rgba(255,255,255,.85);
+
+  font-size: 14px;
+  font-weight: 500;
+
+  letter-spacing: .04em;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+  .photo-viewer {
+    padding: 15px;
+  }
+
+  .photo-viewer-content {
+    width: 100%;
+    height: 82vh;
+  }
+
+  .photo-viewer-image {
+    max-width: 94vw;
+    max-height: 78vh;
+
+    border-radius: 10px;
+  }
+
+  .photo-viewer-close {
+    top: 12px;
+    right: 12px;
+
+    width: 42px;
+    height: 42px;
+
+    font-size: 28px;
+  }
+
+  .photo-viewer-prev,
+  .photo-viewer-next {
+    width: 42px;
+    height: 42px;
+
+    font-size: 32px;
+
+    background: rgba(255,255,255,.10);
+  }
+
+  .photo-viewer-prev {
+    left: 10px;
+  }
+
+  .photo-viewer-next {
+    right: 10px;
+  }
+
+  .photo-viewer-counter {
+    bottom: -28px;
+    font-size: 13px;
+  }
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+  .photo-viewer,
+  .photo-viewer-image,
+  .photo-viewer-prev,
+  .photo-viewer-next,
+  .photo-viewer-close {
+    transition: none;
+  }
+
+  .photo-viewer-image {
+    transform: none;
+  }
+}
