@@ -132,3 +132,170 @@ async function loadSiteContent() {
   }
 }
 document.addEventListener("DOMContentLoaded", loadSiteContent);
+/* =========================================================
+   BIRTHDAY ANIMATION ENGINE
+   ========================================================= */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  /*
+   * Scroll reveal
+   */
+  const revealTargets = document.querySelectorAll(
+    "main > section, .letter, .music, .collagebox, .note"
+  );
+
+  revealTargets.forEach((element) => {
+    element.classList.add("reveal");
+  });
+
+
+  /*
+   * Reveal elements when they enter the screen
+   */
+  const revealObserver = new IntersectionObserver(
+    (entries, observer) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+
+        entry.target.classList.add("visible");
+        observer.unobserve(entry.target);
+      });
+    },
+    {
+      threshold: 0.14,
+      rootMargin: "0px 0px -60px 0px"
+    }
+  );
+
+  revealTargets.forEach((element) => {
+    revealObserver.observe(element);
+  });
+
+
+  /*
+   * Photo-by-photo entrance
+   */
+  const gallery = document.getElementById("gallery");
+
+  if (gallery) {
+    const galleryObserver = new MutationObserver(() => {
+
+      const photos = gallery.querySelectorAll(".photo");
+
+      photos.forEach((photo, index) => {
+        photo.classList.add("reveal");
+
+        photo.style.transitionDelay =
+          Math.min(index * 90, 500) + "ms";
+
+        revealObserver.observe(photo);
+      });
+
+    });
+
+    galleryObserver.observe(gallery, {
+      childList: true,
+      subtree: true
+    });
+
+    /*
+     * Handle photos already present
+     */
+    gallery.querySelectorAll(".photo").forEach((photo, index) => {
+      photo.classList.add("reveal");
+
+      photo.style.transitionDelay =
+        Math.min(index * 90, 500) + "ms";
+
+      revealObserver.observe(photo);
+    });
+  }
+
+
+  /*
+   * Music animation
+   */
+  const player = document.getElementById("player");
+  const musicCard = document.querySelector(".music");
+
+  if (player && musicCard) {
+
+    player.addEventListener("play", () => {
+      musicCard.classList.add("is-playing");
+    });
+
+    player.addEventListener("pause", () => {
+      musicCard.classList.remove("is-playing");
+    });
+
+    player.addEventListener("ended", () => {
+      musicCard.classList.remove("is-playing");
+    });
+  }
+
+
+  /*
+   * Little celebration when the teddy is opened
+   *
+   * This complements the existing confetti function
+   * without replacing it.
+   */
+  const teddy = document.querySelector(".teddy");
+
+  if (teddy) {
+    teddy.addEventListener("click", () => {
+
+      teddy.classList.remove("teddy-hug");
+
+      void teddy.offsetWidth;
+
+      teddy.classList.add("teddy-hug");
+
+      setTimeout(() => {
+        teddy.classList.remove("teddy-hug");
+      }, 1400);
+
+    });
+  }
+
+
+  /*
+   * Add a few tiny birthday sparkles to the hero.
+   */
+  const hero = document.querySelector(".hero");
+
+  if (hero) {
+
+    const sparkleCharacters = ["✦", "✧", "•", "✦", "·"];
+
+    for (let i = 0; i < 18; i++) {
+
+      const sparkle = document.createElement("span");
+
+      sparkle.className = "birthday-sparkle";
+
+      sparkle.textContent =
+        sparkleCharacters[
+          Math.floor(
+            Math.random() * sparkleCharacters.length
+          )
+        ];
+
+      sparkle.style.left =
+        Math.random() * 100 + "%";
+
+      sparkle.style.top =
+        8 + Math.random() * 82 + "%";
+
+      sparkle.style.animationDelay =
+        Math.random() * 4 + "s";
+
+      sparkle.style.animationDuration =
+        3.5 + Math.random() * 3 + "s";
+
+      hero.appendChild(sparkle);
+    }
+  }
+
+});
