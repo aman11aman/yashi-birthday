@@ -545,3 +545,46 @@ footer {
     transform: none !important;
   }
 }
+/* ---------- BIRTHDAY SPARKLES ---------- */
+
+.birthday-sparkle {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  color: #f3b85b;
+  font-size: 14px;
+  opacity: 0;
+  animation: sparkleFloat ease-in-out infinite;
+}
+
+@keyframes sparkleFloat {
+  0%, 100% {
+    opacity: 0;
+    transform: translateY(8px) scale(.7) rotate(0deg);
+  }
+
+  25% {
+    opacity: .65;
+  }
+
+  50% {
+    opacity: .9;
+    transform: translateY(-12px) scale(1) rotate(20deg);
+  }
+
+  75% {
+    opacity: .45;
+  }
+}
+
+@media (max-width: 600px) {
+  .birthday-sparkle {
+    font-size: 11px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .birthday-sparkle {
+    display: none;
+  }
+}
