@@ -36,3 +36,512 @@
 @keyframes teddyBounce{0%,100%{transform:translateY(0) rotate(-2deg) scale(1)}50%{transform:translateY(-12px) rotate(2deg) scale(1.04)}}
 .teddy-hug{animation:teddyBounce .65s ease-in-out 2!important}
 @media(max-width:500px){.teddy{transform:scale(.9);transform-origin:center}.teddy-link{min-width:180px}}
+
+/* =========================================================
+   BIRTHDAY ANIMATION UPGRADE
+   Cute • Playful • Celebratory • Not overly romantic
+   ========================================================= */
+
+/* ---------- HERO ENTRANCE ---------- */
+
+.hero-inner > .tiny,
+.hero-inner > h1,
+.hero-inner > p,
+.hero-inner > .teddy-link,
+.hero-inner > .scroll {
+  opacity: 0;
+  animation: birthdayEntrance 0.8s cubic-bezier(.2,.8,.2,1) forwards;
+}
+
+.hero-inner > .tiny {
+  animation-delay: .15s;
+}
+
+.hero-inner > h1 {
+  animation-delay: .3s;
+}
+
+.hero-inner > p {
+  animation-delay: .45s;
+}
+
+.hero-inner > .teddy-link {
+  animation-delay: .65s;
+}
+
+.hero-inner > .scroll {
+  animation-delay: 1.05s;
+}
+
+@keyframes birthdayEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(22px) scale(.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+
+/* ---------- HERO BACKGROUND ---------- */
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.hero::before,
+.hero::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  z-index: -1;
+  border-radius: 50%;
+}
+
+.hero::before {
+  width: 230px;
+  height: 230px;
+  top: 7%;
+  left: -80px;
+  background:
+    radial-gradient(circle at 35% 35%, #ffd166 0 5px, transparent 6px),
+    radial-gradient(circle at 70% 25%, #ff9bb0 0 4px, transparent 5px),
+    radial-gradient(circle at 45% 75%, #8bb8ff 0 4px, transparent 5px);
+  opacity: .7;
+  animation: floatDecoration 7s ease-in-out infinite;
+}
+
+.hero::after {
+  width: 260px;
+  height: 260px;
+  right: -100px;
+  bottom: 5%;
+  background:
+    radial-gradient(circle at 25% 30%, #7fd1b9 0 5px, transparent 6px),
+    radial-gradient(circle at 70% 45%, #ffd166 0 4px, transparent 5px),
+    radial-gradient(circle at 45% 75%, #ff9bb0 0 5px, transparent 6px);
+  opacity: .65;
+  animation: floatDecoration 8s ease-in-out infinite reverse;
+}
+
+@keyframes floatDecoration {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(12px, -18px, 0) rotate(6deg);
+  }
+}
+
+
+/* ---------- TEDDY ---------- */
+
+.teddy {
+  transition:
+    transform .35s ease,
+    filter .35s ease;
+}
+
+.teddy-link:hover .teddy {
+  filter:
+    drop-shadow(0 18px 20px rgba(85,55,45,.16))
+    brightness(1.03);
+}
+
+.teddy-link:active .teddy {
+  transform: scale(.96);
+}
+
+.teddy-hint {
+  animation: hintPulse 2.2s ease-in-out infinite;
+}
+
+@keyframes hintPulse {
+  0%, 100% {
+    opacity: .7;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+.flower-bunch span {
+  animation: flowerSway 2.4s ease-in-out infinite;
+}
+
+.flower-bunch span:nth-child(2) {
+  animation-delay: -.5s;
+}
+
+.flower-bunch span:nth-child(3) {
+  animation-delay: -.9s;
+}
+
+.flower-bunch span:nth-child(4) {
+  animation-delay: -1.3s;
+}
+
+@keyframes flowerSway {
+  0%, 100% {
+    transform: rotate(-3deg) translateY(0);
+  }
+  50% {
+    transform: rotate(5deg) translateY(-3px);
+  }
+}
+
+
+/* ---------- STICKER ---------- */
+
+.sticker {
+  display: inline-block;
+  animation: stickerBounce 3s ease-in-out infinite;
+}
+
+@keyframes stickerBounce {
+  0%, 100% {
+    transform: translateY(0) rotate(-3deg);
+  }
+  50% {
+    transform: translateY(-7px) rotate(3deg);
+  }
+}
+
+
+/* ---------- SCROLL REVEALS ---------- */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(45px);
+  transition:
+    opacity .8s ease,
+    transform .8s cubic-bezier(.2,.8,.2,1);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+/* ---------- LETTER ---------- */
+
+.letter {
+  transition:
+    transform .45s ease,
+    box-shadow .45s ease;
+}
+
+.letter.visible {
+  animation: letterDrop .9s cubic-bezier(.2,.8,.2,1) both;
+}
+
+@keyframes letterDrop {
+  from {
+    opacity: 0;
+    transform: translateY(45px) rotate(-2deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(-.3deg);
+  }
+}
+
+.letter:hover {
+  transform: rotate(0deg) translateY(-3px);
+  box-shadow: 0 25px 70px rgba(92,58,70,.12);
+}
+
+.letter p {
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity .6s ease,
+    transform .6s ease;
+}
+
+.letter.visible p {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.letter.visible p:nth-of-type(1) { transition-delay: .10s; }
+.letter.visible p:nth-of-type(2) { transition-delay: .16s; }
+.letter.visible p:nth-of-type(3) { transition-delay: .22s; }
+.letter.visible p:nth-of-type(4) { transition-delay: .28s; }
+.letter.visible p:nth-of-type(5) { transition-delay: .34s; }
+.letter.visible p:nth-of-type(6) { transition-delay: .40s; }
+.letter.visible p:nth-of-type(7) { transition-delay: .46s; }
+.letter.visible p:nth-of-type(8) { transition-delay: .52s; }
+.letter.visible p:nth-of-type(9) { transition-delay: .58s; }
+.letter.visible p:nth-of-type(10) { transition-delay: .64s; }
+.letter.visible p:nth-of-type(11) { transition-delay: .70s; }
+.letter.visible p:nth-of-type(12) { transition-delay: .76s; }
+.letter.visible p:nth-of-type(13) { transition-delay: .82s; }
+.letter.visible p:nth-of-type(14) { transition-delay: .88s; }
+.letter.visible p:nth-of-type(15) { transition-delay: .94s; }
+.letter.visible p:nth-of-type(16) { transition-delay: 1s; }
+
+
+/* ---------- TAPE ---------- */
+
+.letter .tape {
+  transform: translateX(-50%) rotate(2deg);
+  transition: transform .4s ease;
+}
+
+.letter:hover .tape {
+  transform: translateX(-50%) rotate(-2deg) translateY(-2px);
+}
+
+
+/* ---------- PHOTOS ---------- */
+
+.photo {
+  opacity: 0;
+  transform:
+    translateY(35px)
+    scale(.96)
+    rotate(var(--photo-rotation, 0deg));
+
+  transition:
+    opacity .7s ease,
+    transform .7s cubic-bezier(.2,.8,.2,1),
+    box-shadow .35s ease;
+}
+
+.photo.visible {
+  opacity: 1;
+  transform:
+    translateY(0)
+    scale(1)
+    rotate(var(--photo-rotation, 0deg));
+}
+
+.photo:nth-child(odd) {
+  --photo-rotation: -1deg;
+}
+
+.photo:nth-child(even) {
+  --photo-rotation: 1deg;
+}
+
+.photo:nth-child(3n) {
+  --photo-rotation: -.5deg;
+}
+
+.photo:hover {
+  transform:
+    translateY(-6px)
+    scale(1.025)
+    rotate(0deg);
+  box-shadow: 0 18px 40px rgba(92,58,70,.15);
+  z-index: 2;
+}
+
+.photo img {
+  transition: transform .6s ease;
+}
+
+.photo:hover img {
+  transform: scale(1.045);
+}
+
+
+/* ---------- COLLAGE ---------- */
+
+.collagebox {
+  opacity: 0;
+  transform: scale(.94) rotate(-1deg);
+  transition:
+    opacity .8s ease,
+    transform .8s cubic-bezier(.2,.8,.2,1);
+}
+
+.collagebox.visible {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+.collagebox img {
+  transition: transform .7s ease;
+}
+
+.collagebox:hover img {
+  transform: scale(1.015);
+}
+
+
+/* ---------- MUSIC ---------- */
+
+.music {
+  transition:
+    transform .4s ease,
+    box-shadow .4s ease;
+}
+
+.music.visible {
+  animation: musicReveal .8s cubic-bezier(.2,.8,.2,1) both;
+}
+
+@keyframes musicReveal {
+  from {
+    opacity: 0;
+    transform: translateY(35px) scale(.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.music:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 22px 55px rgba(92,58,70,.10);
+}
+
+.music-icon {
+  display: inline-block;
+}
+
+.music.is-playing .music-icon {
+  animation: musicBounce .9s ease-in-out infinite;
+}
+
+@keyframes musicBounce {
+  0%, 100% {
+    transform: translateY(0) rotate(-5deg) scale(1);
+  }
+  50% {
+    transform: translateY(-7px) rotate(5deg) scale(1.08);
+  }
+}
+
+
+/* ---------- FINAL NOTE ---------- */
+
+.final {
+  padding-top: 30px;
+}
+
+.note {
+  opacity: 0;
+  transform: translateY(40px) rotate(3deg) scale(.96);
+  transition:
+    opacity .9s ease,
+    transform .9s cubic-bezier(.2,.8,.2,1),
+    box-shadow .4s ease;
+}
+
+.note.visible {
+  opacity: 1;
+  transform: translateY(0) rotate(1deg) scale(1);
+}
+
+.note:hover {
+  transform: translateY(-5px) rotate(0deg);
+  box-shadow: 0 25px 55px rgba(128,101,15,.16);
+}
+
+.note > div:first-child {
+  display: inline-block;
+  animation: pinWiggle 3.5s ease-in-out infinite;
+}
+
+@keyframes pinWiggle {
+  0%, 85%, 100% {
+    transform: rotate(0deg);
+  }
+  90% {
+    transform: rotate(-8deg);
+  }
+  95% {
+    transform: rotate(7deg);
+  }
+}
+
+
+/* ---------- FOOTER ---------- */
+
+footer {
+  transition: opacity .5s ease;
+}
+
+
+/* ---------- CONFETTI ---------- */
+
+.confetti-piece {
+  border-radius: 2px;
+  will-change: transform, opacity;
+}
+
+.confetti-piece:nth-child(3n) {
+  border-radius: 50%;
+}
+
+.confetti-piece:nth-child(4n) {
+  width: 6px;
+  height: 18px;
+}
+
+.confetti-piece:nth-child(5n) {
+  width: 12px;
+  height: 7px;
+}
+
+
+/* ---------- MOBILE ---------- */
+
+@media (max-width: 700px) {
+  .hero-inner > h1 {
+    animation-duration: .7s;
+  }
+
+  .photo:hover {
+    transform:
+      translateY(-2px)
+      scale(1.01)
+      rotate(0deg);
+  }
+
+  .letter:hover {
+    transform: rotate(-.3deg);
+  }
+
+  .music:hover,
+  .note:hover {
+    transform: none;
+  }
+}
+
+
+/* ---------- REDUCED MOTION ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+
+  .reveal,
+  .photo,
+  .collagebox,
+  .note,
+  .letter p {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
