@@ -18,7 +18,15 @@ function publicUrl(client, path) {
 
 
 /* =========================================================
-   LOAD PHOTOS, COLLAGE & MUSIC
+   GLOBAL PHOTO DATA
+   ========================================================= */
+
+let birthdayPhotos = [];
+let currentPhotoIndex = 0;
+
+
+/* =========================================================
+   LOAD PHOTOS + MUSIC
    ========================================================= */
 
 async function loadMedia() {
@@ -48,7 +56,7 @@ async function loadMedia() {
 
     const data = result.data || [];
 
-    const photos = data.filter(
+    birthdayPhotos = data.filter(
       item => item.type === "photo"
     );
 
@@ -57,9 +65,9 @@ async function loadMedia() {
     );
 
 
-    /* -------------------------
-       PHOTOS
-       ------------------------- */
+    /* =====================================================
+       PHOTO GALLERY
+       ===================================================== */
 
     const gallery =
       document.getElementById("gallery");
@@ -68,76 +76,135 @@ async function loadMedia() {
 
       gallery.innerHTML = "";
 
-      if (!photos.length) {
+      if (!birthdayPhotos.length) {
 
         gallery.innerHTML =
           '<div class="empty">📸<br><b>Memories coming soon...</b></div>';
 
       } else {
 
-        photos.forEach((photo, index) => {
+        birthdayPhotos.forEach(
+          (photo, index) => {
 
-          const box =
-            document.createElement("div");
+            const box =
+              document.createElement("div");
 
-          box.className = "photo";
+            box.className = "photo";
 
-          if (index === 1) {
-            box.classList.add("tall");
-          }
+            /*
+             * Keep the existing layout variations.
+             */
+            if (index === 1) {
+              box.classList.add("tall");
+            }
 
-          if (index === 3) {
-            box.classList.add("wide");
-          }
+            if (index === 3) {
+              box.classList.add("wide");
+            }
 
-          const img =
-            document.createElement("img");
-
-          img.src =
-            publicUrl(
-              client,
-              photo.file_path
+            /*
+             * Make it obvious that the
+             * photo can be opened.
+             */
+            box.setAttribute(
+              "role",
+              "button"
             );
 
-          img.alt =
-            "A birthday memory";
+            box.setAttribute(
+              "tabindex",
+              "0"
+            );
 
-          img.loading =
-            "lazy";
+            box.setAttribute(
+              "aria-label",
+              `Open photo ${index + 1}`
+            );
 
-          box.appendChild(img);
+            const img =
+              document.createElement("img");
 
-          gallery.appendChild(box);
+            img.src =
+              publicUrl(
+                client,
+                photo.file_path
+              );
 
-          /*
-           * Reveal the photo after it has
-           * been added to the page.
-           *
-           * This is important because our
-           * animation CSS starts photos at
-           * opacity: 0.
-           */
-          setTimeout(() => {
-            box.classList.add("visible");
-          }, Math.min(index * 120, 700));
+            img.alt =
+              "Birthday memory";
 
-        });
+            img.loading =
+              "lazy";
+
+            box.appendChild(img);
+
+            gallery.appendChild(box);
+
+
+            /*
+             * Photo reveal animation.
+             */
+            setTimeout(
+              () => {
+                box.classList.add(
+                  "visible"
+                );
+              },
+              Math.min(
+                index * 120,
+                700
+              )
+            );
+
+
+            /*
+             * Open photo viewer.
+             */
+            box.addEventListener(
+              "click",
+              () => {
+                openPhotoViewer(index);
+              }
+            );
+
+
+            /*
+             * Keyboard accessibility.
+             */
+            box.addEventListener(
+              "keydown",
+              (event) => {
+
+                if (
+                  event.key === "Enter" ||
+                  event.key === " "
+                ) {
+
+                  event.preventDefault();
+
+                  openPhotoViewer(index);
+                }
+              }
+            );
+          }
+        );
       }
     }
+
 
     if (galleryStatus) {
 
       galleryStatus.textContent =
-        photos.length
-          ? photos.length +
+        birthdayPhotos.length
+          ? birthdayPhotos.length +
             " little memories"
           : "A few memories are waiting to be added.";
     }
 
 
-    /* -------------------------
+    /* =====================================================
        BACKGROUND MUSIC
-       ------------------------- */
+       ===================================================== */
 
     if (music) {
 
@@ -154,11 +221,14 @@ async function loadMedia() {
             music.file_path
           );
 
-        player.loop = true;
+        player.loop =
+          true;
 
-        player.volume = 0.55;
+        player.volume =
+          0.55;
 
-        player.preload = "auto";
+        player.preload =
+          "auto";
       }
     }
 
@@ -179,6 +249,158 @@ async function loadMedia() {
 
 
 /* =========================================================
+   PHOTO VIEWER
+   ========================================================= */
+
+function getPhotoViewer() {
+  return document.getElementById(
+    "photoViewer"
+  );
+}
+
+
+function updatePhotoViewer() {
+
+  const viewer =
+    getPhotoViewer();
+
+  if (!viewer) return;
+
+  const image =
+    viewer.querySelector(
+      ".photo-viewer-image"
+    );
+
+  const counter =
+    viewer.querySelector(
+      ".photo-viewer-counter"
+    );
+
+  if (!birthdayPhotos.length) {
+    return;
+  }
+
+  const photo =
+    birthdayPhotos[
+      currentPhotoIndex
+    ];
+
+  const client =
+    getClient();
+
+  if (image) {
+
+    image.src =
+      publicUrl(
+        client,
+        photo.file_path
+      );
+
+    image.alt =
+      `Birthday memory ${
+        currentPhotoIndex + 1
+      }`;
+  }
+
+  if (counter) {
+
+    counter.textContent =
+      `${currentPhotoIndex + 1} / ${
+        birthdayPhotos.length
+      }`;
+  }
+}
+
+
+function openPhotoViewer(index) {
+
+  if (!birthdayPhotos.length) {
+    return;
+  }
+
+  currentPhotoIndex =
+    Math.max(
+      0,
+      Math.min(
+        index,
+        birthdayPhotos.length - 1
+      )
+    );
+
+  const viewer =
+    getPhotoViewer();
+
+  if (!viewer) {
+    return;
+  }
+
+  updatePhotoViewer();
+
+  viewer.classList.add(
+    "open"
+  );
+
+  document.body.classList.add(
+    "photo-viewer-open"
+  );
+}
+
+
+function closePhotoViewer() {
+
+  const viewer =
+    getPhotoViewer();
+
+  if (!viewer) {
+    return;
+  }
+
+  viewer.classList.remove(
+    "open"
+  );
+
+  document.body.classList.remove(
+    "photo-viewer-open"
+  );
+}
+
+
+function showPreviousPhoto() {
+
+  if (!birthdayPhotos.length) {
+    return;
+  }
+
+  currentPhotoIndex =
+    (
+      currentPhotoIndex -
+      1 +
+      birthdayPhotos.length
+    ) %
+    birthdayPhotos.length;
+
+  updatePhotoViewer();
+}
+
+
+function showNextPhoto() {
+
+  if (!birthdayPhotos.length) {
+    return;
+  }
+
+  currentPhotoIndex =
+    (
+      currentPhotoIndex +
+      1
+    ) %
+    birthdayPhotos.length;
+
+  updatePhotoViewer();
+}
+
+
+/* =========================================================
    CONFETTI
    ========================================================= */
 
@@ -189,7 +411,9 @@ function confetti() {
       "confetti"
     );
 
-  if (!container) return;
+  if (!container) {
+    return;
+  }
 
   for (let i = 0; i < 90; i++) {
 
@@ -200,20 +424,31 @@ function confetti() {
       "confetti-piece";
 
     piece.style.left =
-      Math.random() * 100 + "vw";
+      Math.random() *
+        100 +
+      "vw";
 
     piece.style.setProperty(
       "--x",
-      (Math.random() * 260 - 130) +
+      (
+        Math.random() *
+          260 -
+        130
+      ) +
         "px"
     );
 
     piece.style.animationDuration =
-      (2.8 + Math.random() * 2.8) +
+      (
+        2.8 +
+        Math.random() *
+          2.8
+      ) +
       "s";
 
     piece.style.animationDelay =
-      Math.random() * 0.35 +
+      Math.random() *
+        0.35 +
       "s";
 
     piece.style.background =
@@ -225,7 +460,8 @@ function confetti() {
         "#c8a1ff"
       ][
         Math.floor(
-          Math.random() * 5
+          Math.random() *
+            5
         )
       ];
 
@@ -234,7 +470,8 @@ function confetti() {
     );
 
     setTimeout(
-      () => piece.remove(),
+      () =>
+        piece.remove(),
       6500
     );
   }
@@ -271,10 +508,13 @@ document.addEventListener(
 
 
     /* =====================================================
-       TEDDY CLICK
+       TEDDY
        ===================================================== */
 
-    if (button && content) {
+    if (
+      button &&
+      content
+    ) {
 
       button.addEventListener(
         "click",
@@ -302,9 +542,11 @@ document.addEventListener(
 
             try {
 
-              player.volume = 0.55;
+              player.volume =
+                0.55;
 
-              player.loop = true;
+              player.loop =
+                true;
 
               await player.play();
 
@@ -339,15 +581,17 @@ document.addEventListener(
 
 
           /* -------------------------
-             SCROLL TO CONTENT
+             SCROLL
              ------------------------- */
 
           setTimeout(
             () => {
 
               content.scrollIntoView({
-                behavior: "smooth",
-                block: "start"
+                behavior:
+                  "smooth",
+                block:
+                  "start"
               });
 
             },
@@ -359,7 +603,7 @@ document.addEventListener(
 
 
     /* =====================================================
-       FLOATING MUSIC BUTTON
+       MUSIC BUTTON
        ===================================================== */
 
     if (
@@ -371,7 +615,9 @@ document.addEventListener(
         "click",
         async () => {
 
-          if (player.paused) {
+          if (
+            player.paused
+          ) {
 
             try {
 
@@ -477,6 +723,206 @@ document.addEventListener(
 
 
     /* =====================================================
+       PHOTO VIEWER CONTROLS
+       ===================================================== */
+
+    const viewer =
+      document.getElementById(
+        "photoViewer"
+      );
+
+    if (viewer) {
+
+      const closeButton =
+        viewer.querySelector(
+          ".photo-viewer-close"
+        );
+
+      const previousButton =
+        viewer.querySelector(
+          ".photo-viewer-prev"
+        );
+
+      const nextButton =
+        viewer.querySelector(
+          ".photo-viewer-next"
+        );
+
+
+      if (closeButton) {
+
+        closeButton.addEventListener(
+          "click",
+          closePhotoViewer
+        );
+      }
+
+
+      if (previousButton) {
+
+        previousButton.addEventListener(
+          "click",
+          (event) => {
+
+            event.stopPropagation();
+
+            showPreviousPhoto();
+          }
+        );
+      }
+
+
+      if (nextButton) {
+
+        nextButton.addEventListener(
+          "click",
+          (event) => {
+
+            event.stopPropagation();
+
+            showNextPhoto();
+          }
+        );
+      }
+
+
+      /*
+       * Clicking the dark background
+       * closes the viewer.
+       */
+
+      viewer.addEventListener(
+        "click",
+        (event) => {
+
+          if (
+            event.target ===
+            viewer
+          ) {
+
+            closePhotoViewer();
+          }
+        }
+      );
+
+
+      /*
+       * Keyboard navigation.
+       */
+
+      document.addEventListener(
+        "keydown",
+        (event) => {
+
+          if (
+            !viewer.classList.contains(
+              "open"
+            )
+          ) {
+            return;
+          }
+
+          if (
+            event.key ===
+            "Escape"
+          ) {
+
+            closePhotoViewer();
+
+          } else if (
+            event.key ===
+            "ArrowLeft"
+          ) {
+
+            showPreviousPhoto();
+
+          } else if (
+            event.key ===
+            "ArrowRight"
+          ) {
+
+            showNextPhoto();
+          }
+        }
+      );
+
+
+      /*
+       * Touch/swipe support.
+       */
+
+      let touchStartX =
+        0;
+
+      let touchEndX =
+        0;
+
+      viewer.addEventListener(
+        "touchstart",
+        (event) => {
+
+          if (
+            event.touches.length
+          ) {
+
+            touchStartX =
+              event.touches[0]
+                .clientX;
+          }
+        },
+        {
+          passive: true
+        }
+      );
+
+
+      viewer.addEventListener(
+        "touchend",
+        (event) => {
+
+          if (
+            event.changedTouches.length
+          ) {
+
+            touchEndX =
+              event.changedTouches[0]
+                .clientX;
+
+            const distance =
+              touchEndX -
+              touchStartX;
+
+            /*
+             * Minimum swipe distance.
+             */
+
+            if (
+              Math.abs(distance) <
+              50
+            ) {
+              return;
+            }
+
+            if (
+              distance < 0
+            ) {
+
+              showNextPhoto();
+
+            } else {
+
+              showPreviousPhoto();
+            }
+          }
+        },
+        {
+          passive: true
+        }
+      );
+    }
+
+
+    /* =====================================================
        LOAD MEDIA
        ===================================================== */
 
@@ -487,7 +933,7 @@ document.addEventListener(
 
 
 /* =========================================================
-   EDITABLE LETTER & FINAL NOTE
+   EDITABLE LETTER + FINAL NOTE
    ========================================================= */
 
 async function loadSiteContent() {
@@ -531,15 +977,18 @@ async function loadSiteContent() {
        LETTER
        ------------------------- */
 
-    if (map.letter_html) {
+    if (
+      map.letter_html
+    ) {
 
-      const el =
+      const element =
         document.getElementById(
           "letterContent"
         );
 
-      if (el) {
-        el.innerHTML =
+      if (element) {
+
+        element.innerHTML =
           map.letter_html;
       }
     }
@@ -553,13 +1002,14 @@ async function loadSiteContent() {
       map.final_note_title
     ) {
 
-      const el =
+      const element =
         document.getElementById(
           "finalNoteTitle"
         );
 
-      if (el) {
-        el.innerHTML =
+      if (element) {
+
+        element.innerHTML =
           map.final_note_title;
       }
     }
@@ -573,13 +1023,14 @@ async function loadSiteContent() {
       map.final_note_caption
     ) {
 
-      const el =
+      const element =
         document.getElementById(
           "finalNoteCaption"
         );
 
-      if (el) {
-        el.textContent =
+      if (element) {
+
+        element.textContent =
           map.final_note_caption;
       }
     }
